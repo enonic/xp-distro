@@ -1,0 +1,58 @@
+plugins {
+    id 'java-base'
+    id 'maven'
+    id 'com.enonic.defaults' version '1.0.3'
+}
+
+group = 'com.enonic.xp'
+
+repositories {
+    jcenter()
+    maven {
+        url 'http://repo.enonic.com/public'
+    }
+}
+
+configurations {
+    app
+    distro
+}
+
+dependencies {
+    app "${group}:app-main:${version}"
+    app "${group}:app-standardidprovider:${version}"
+    app "${group}:app-applications:${version}"
+    app "${group}:app-contentstudio:${version}"
+    app "${group}:app-users:${version}"
+    distro "${group}:runtime:${version}"
+}
+
+ext {
+    installDir = "$buildDir/install"
+    archiveBase = "enonic-xp-$version"
+    appLevel = 40
+}
+
+task unpackDistro( type: Copy ) {
+    from {
+        configurations.distro.collect { zipTree( it ) }
+    }
+    into installDir
+}
+
+task copyApps( type: Copy, dependsOn: unpackDistro ) {
+    from( configurations.app )
+    into "$installDir/system/$appLevel"
+}
+
+task distZip( type: Zip, dependsOn: copyApps ) {
+    description = 'Build full distribution zip.'
+    group = 'Dist'
+    baseName = 'distro'
+    from installDir
+    into archiveBase
+}
+
+artifacts {
+    archives distZip
+}
