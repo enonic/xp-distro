@@ -19,12 +19,12 @@ configurations {
 }
 
 dependencies {
-    app "${group}:app-main:${version}"
-    app "${group}:app-standardidprovider:${version}"
-    app "${group}:app-applications:${version}"
-    app "${group}:app-contentstudio:${version}"
-    app "${group}:app-users:${version}"
-    distro "${group}:runtime:${version}"
+    app "${group}:app-main:${version}@jar"
+    app "${group}:app-standardidprovider:${version}@jar"
+    app "${group}:app-applications:${version}@jar"
+    app "${group}:app-contentstudio:${version}@jar"
+    app "${group}:app-users:${version}@jar"
+    distro "${group}:runtime:${version}@zip"
 }
 
 ext {
