@@ -10,5 +10,5 @@ To upload `xp-base` docker image for this version:
 gradle pushDocker
 ```
 
-You will need to set `dockerEmail` and `dockerPassword` in `~/.gradle/gradle.properties`
+You will need to set `dockerUser`, `dockerEmail` and `dockerPassword` in `~/.gradle/gradle.properties`
 file.

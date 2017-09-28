@@ -3,11 +3,12 @@ plugins {
 }
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerInspectImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 docker {
     registryCredentials {
-        username = 'enonic'
+        username = project.findProperty( 'dockerUser' )
         email = project.findProperty( 'dockerEmail' )
         password = project.findProperty( 'dockerPassword' )
     }
@@ -25,7 +26,11 @@ task dockerBuild( type: DockerBuildImage, dependsOn: copyDist ) {
     tags = ['enonic/xp-base', "enonic/xp-base:$version".toString()]
 }
 
-task dockerPush( type: DockerPushImage, dependsOn: dockerBuild ) {
+task dockerInspect( type: DockerInspectImage, dependsOn: dockerBuild ) {
+    targetImageId { dockerBuild.getImageId() }
+}
+
+task dockerPush( type: DockerPushImage, dependsOn: dockerInspect ) {
     imageName 'enonic/xp-base'
     tag "$version"
 }
