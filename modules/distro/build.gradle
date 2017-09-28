@@ -1,0 +1,55 @@
+plugins {
+    id 'maven'
+    id 'com.enonic.defaults' version '1.0.3'
+    // id 'com.bmuschko.docker-remote-api' version '3.1.0'
+}
+
+configurations {
+    app
+    distro
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    app "${group}:app-main:${version}@jar"
+    app "${group}:app-standardidprovider:${version}@jar"
+    app "${group}:app-applications:${version}@jar"
+    app "${group}:app-contentstudio:${version}@jar"
+    app "${group}:app-users:${version}@jar"
+    distro( "${group}:runtime:${version}@zip" )
+}
+
+ext {
+    installDir = "$buildDir/install"
+    archiveBase = "enonic-xp-$version"
+    appLevel = 40
+}
+
+task unpackDistro( type: Copy ) {
+    from {
+        configurations.distro.collect { zipTree( it ) }
+    }
+    into installDir
+}
+
+task copyApps( type: Copy, dependsOn: unpackDistro ) {
+    from( configurations.app )
+    into "$installDir/system/$appLevel"
+}
+
+task copyDist( dependsOn: copyApps )
+
+task distZip( type: Zip, dependsOn: copyDist ) {
+    description = 'Build full distribution zip.'
+    group = 'Dist'
+    baseName = 'distro'
+    from installDir
+    into archiveBase
+}
+
+artifacts {
+    archives distZip
+}
