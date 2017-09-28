@@ -7,15 +7,19 @@ plugins {
 group = 'com.enonic.xp'
 
 repositories {
-    jcenter()
     maven {
         url 'http://repo.enonic.com/public'
     }
+    jcenter()
 }
 
 configurations {
     app
     distro
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 dependencies {
@@ -24,7 +28,7 @@ dependencies {
     app "${group}:app-applications:${version}@jar"
     app "${group}:app-contentstudio:${version}@jar"
     app "${group}:app-users:${version}@jar"
-    distro "${group}:runtime:${version}@zip"
+    distro("${group}:runtime:${version}@zip")
 }
 
 ext {
