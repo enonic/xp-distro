@@ -9,7 +9,7 @@ that are necessary to use XP in a meaningful way.
 
 Set the desired version in `gradle.properties`, and run:
 
-   gradle build
+    gradle build
 
 ## Running
 
