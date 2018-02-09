@@ -24,7 +24,7 @@ dependencies {
 
 ext {
     installDir = "$buildDir/install"
-    archiveBase = "enonic-xp-$version"
+    archiveBase = "enonic-xp-$vXpRuntime"
     appLevel = 40
 }
 
