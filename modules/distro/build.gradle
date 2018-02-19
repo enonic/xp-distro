@@ -35,7 +35,12 @@ task unpackDistro( type: Copy ) {
     into installDir
 }
 
-task copyApps( type: Copy, dependsOn: unpackDistro ) {
+task copyResources( type: Copy, dependsOn: unpackDistro  ) {
+    destinationDir = file( installDir )
+    from( 'src' )
+}
+
+task copyApps( type: Copy, dependsOn: copyResources ) {
     from( configurations.app )
     into "$installDir/system/$appLevel"
 }
