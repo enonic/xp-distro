@@ -19,7 +19,7 @@ dependencies {
     app "${group}:app-applications:${vApplicationsApp}@jar"
     app "${group}:app-contentstudio:${vContentStudioApp}@jar"
     app "${group}:app-users:${vUsersApp}@jar"
-    distro( "${group}:runtime:${version}@zip" )
+    distro( "${group}:runtime:${vXpRuntime}@zip" )
 }
 
 ext {
