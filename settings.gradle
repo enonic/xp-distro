@@ -3,6 +3,8 @@ include ':docker'
 
 rootProject.name = 'xp-distro'
 
+enableFeaturePreview( 'STABLE_PUBLISHING' )
+
 configureProjects( rootProject )
 
 def configureProjects( root )
