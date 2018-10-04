@@ -65,7 +65,7 @@ task downloadJdk( type: Download ) {
             }
             else
             {
-                throw new GradleException( "Unable to unpack JDK: $jdkPackageFile", null )
+                throw new GradleException( "Unable to unpack JDK: $jdkPackageFile" )
             }
         }
     }
@@ -137,7 +137,7 @@ task copyDist( dependsOn: copyApps )
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
-    baseName = isGenericBuild() ? 'distro' : ('distro-' + getPlatform())
+    baseName = isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
     from installDir
     into archiveBase
 }

@@ -1,21 +1,20 @@
+import groovy.json.JsonSlurper
+
 import java.nio.file.FileVisitResult
 
 import static groovy.io.FileType.DIRECTORIES
 
 enum TargetPlatform {
-    WINDOWS( 'windows', 'openjdk-11_windows-x64_bin.zip' ),
-    LINUX( 'linux', 'openjdk-11_linux-x64_bin.tar.gz' ),
-    MAC( 'mac', 'openjdk-11_osx-x64_bin.tar.gz' ),
-    GENERIC( 'generic', '' )
+    WINDOWS( 'windows' ),
+    LINUX( 'linux' ),
+    MAC( 'mac' ),
+    GENERIC( 'generic' )
 
     final String platform
 
-    final String jdkPackageFile
-
-    TargetPlatform( String value, String jdkPackageFile )
+    TargetPlatform( String value )
     {
         this.platform = value
-        this.jdkPackageFile = jdkPackageFile
     }
 
     String toString()
@@ -65,7 +64,7 @@ def getPlatform()
         ext.jdkPlatform = TargetPlatform.from( paramJdkPlatform as String )
         if ( ext.jdkPlatform == TargetPlatform.GENERIC )
         {
-            throw new GradleException( 'Build target platform not supported: ' + paramJdkPlatform, null )
+            throw new GradleException( 'Build target platform not supported: ' + paramJdkPlatform )
         }
         println "Build target platform: ${ext.jdkPlatform}"
     }
@@ -79,7 +78,7 @@ def getPlatform()
 
 def getJdkPackageFile()
 {
-    return this.getPlatform().jdkPackageFile
+    return ext.jdkPackageFile
 }
 
 def isWindowsBuild()
@@ -111,20 +110,47 @@ def findJdkHome( File f )
     }
     if ( binDir == null )
     {
-        throw new GradleException( 'Could not find JDK home directory in ' + f.absolutePath, null )
+        throw new GradleException( 'Could not find JDK home directory in ' + f.absolutePath )
     }
     return binDir.getParentFile()
 }
 
-// List of JDK build URLs from http://jdk.java.net/11/
 def getJdkDownloadUrl()
 {
-    def JdkBaseUrl = 'https://download.java.net/java/ga/jdk11/'
-    return JdkBaseUrl + getJdkPackageFile()
+    def JdkInfoUrl = 'https://api.adoptopenjdk.net/v2/info/releases/openjdk11?'
+
+    def params = [openjdk_impl: 'hotspot',
+                  os          : this.getPlatform().toString(),
+                  arch        : 'x64',
+                  release     : 'latest',
+                  type        : 'jdk']
+    def infoUrl = JdkInfoUrl + params.collect { it }.join( '&' )
+    println "Fetching JDK binary builds info from ${infoUrl}"
+
+    def headers = [accept: 'application/json', 'user-agent': 'curl/7.58.0']
+    def jsonText = ''
+    try
+    {
+        jsonText = new URL( infoUrl ).getText( requestProperties: headers )
+    }
+    catch ( e )
+    {
+        throw new GradleException( 'Could not find JDK binary download URL: ' + infoUrl, e )
+    }
+    def json = new JsonSlurper().parseText( jsonText ) as Map
+
+    if ( !( json['binaries'] && json['binaries'][0] ) )
+    {
+        throw new GradleException( 'Could not find JDK binary download URL: ' + json )
+    }
+    def binaryLink = json['binaries'][0]['binary_link']
+    ext.jdkPackageFile = json['binaries'][0]['binary_name']
+    return binaryLink
 }
 
 ext {
     jdkPlatform = null
+    jdkPackageFile = ''
     getPlatform = this.&getPlatform
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl

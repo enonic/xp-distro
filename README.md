@@ -10,6 +10,22 @@ that are necessary to use XP in a meaningful way.
 Set the desired version in `gradle.properties`, and run:
 
     gradle build
+    
+### Platform specific builds
+
+By default it will build a generic build without including the JDK.
+
+To build a distribution that includes the JDK, pass a parameter with the desired platform: linux, mac, windows  
+
+    gradle build -Pplatform=linux
+    
+    gradle build -Pplatform=mac
+    
+    gradle build -Pplatform=windows
+
+Pass platform=current to build a distribution for the current platform:
+
+    gradle build -Pplatform=current
 
 ## Running
 
