@@ -1,7 +1,6 @@
 plugins {
     id 'maven-publish'
-    id 'com.enonic.defaults' version '2.1.0'
-    // id 'com.bmuschko.docker-remote-api' version '3.1.0'
+    id 'com.enonic.defaults' version '2.0.1'
 }
 
 configurations {
@@ -58,9 +57,6 @@ task distZip( type: Zip, dependsOn: copyDist ) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            // Make sure no JARs published, if 'java' plugin is present
-            // Not really necessary
-            from null
             artifact distZip
         }
     }
