@@ -135,7 +135,7 @@ task copyDist( dependsOn: copyApps )
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
-    baseName = getArtifactId()
+    baseName = targetArtifactId()
     from installDir
     into archiveBase
 }
@@ -145,13 +145,13 @@ build.dependsOn distZip
 publishing {
     publications {
         mavenJava( MavenPublication ) {
-            artifactId getArtifactId()
+            artifactId targetArtifactId()
             artifact distZip
         }
     }
 }
 
-def getArtifactId()
+def targetArtifactId()
 {
     return isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
 }
