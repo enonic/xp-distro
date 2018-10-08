@@ -43,13 +43,9 @@ task downloadJdk( type: Download ) {
     overwrite false
     onlyIfModified true
 
-    if ( !isGenericBuild() )
-    {
-        src getJdkDownloadUrl()
-    }
-
     doFirst {
         mkdir dest
+        src getJdkDownloadUrl()
     }
 
     doLast {
@@ -144,9 +140,11 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
+build.dependsOn distZip
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenJava( MavenPublication ) {
             artifact distZip
         }
     }
