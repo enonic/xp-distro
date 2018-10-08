@@ -28,7 +28,7 @@ ext {
     installDir = "$buildDir/install"
     archiveBase = "enonic-xp-$version"
     appLevel = 40
-    downloadDir = "$buildDir/download"
+    downloadJdkDir = "$buildDir/jdk"
 }
 
 task downloadJdk( type: Download ) {
@@ -39,7 +39,7 @@ task downloadJdk( type: Download ) {
         !isGenericBuild()
     }
 
-    dest "$downloadDir/"
+    dest "$downloadJdkDir/"
     overwrite false
     onlyIfModified true
 
@@ -53,12 +53,12 @@ task downloadJdk( type: Download ) {
             def jdkPackageFile = getJdkPackageFile()
             if ( jdkPackageFile.endsWith( '.zip' ) )
             {
-                def zipFile = file( "$downloadDir/$jdkPackageFile" )
+                def zipFile = file( "$downloadJdkDir/$jdkPackageFile" )
                 from zipTree( zipFile )
             }
             else if ( jdkPackageFile.endsWith( '.tar.gz' ) )
             {
-                def tarFile = resources.gzip( file( "$downloadDir/$jdkPackageFile" ) )
+                def tarFile = resources.gzip( file( "$downloadJdkDir/$jdkPackageFile" ) )
                 from tarTree( tarFile )
             }
             else
@@ -135,7 +135,7 @@ task copyDist( dependsOn: copyApps )
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
-    baseName = isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
+    baseName = getArtifactId()
     from installDir
     into archiveBase
 }
@@ -145,7 +145,13 @@ build.dependsOn distZip
 publishing {
     publications {
         mavenJava( MavenPublication ) {
+            artifactId getArtifactId()
             artifact distZip
         }
     }
+}
+
+def getArtifactId()
+{
+    return isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
 }
