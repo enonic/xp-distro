@@ -44,7 +44,10 @@ task downloadJdk( type: Download ) {
     overwrite false
     onlyIfModified true
 
-    src getJdkDownloadUrl()
+    if ( !isGenericBuild() )
+    {
+        src getJdkDownloadUrl()
+    }
 
     doFirst {
         mkdir dest
