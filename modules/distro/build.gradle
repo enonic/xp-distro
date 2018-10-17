@@ -140,6 +140,14 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
+task latestZip( type: Zip, dependsOn: copyDist ) {
+    description = 'Build full distribution zip.'
+    group = 'Dist'
+    baseName = targetArtifactId()
+    from installDir
+    into archiveBase
+}
+
 build.dependsOn distZip
 
 publishing {
@@ -147,6 +155,11 @@ publishing {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
             artifact distZip
+        }
+        mavenLatest(MavenPublication) {
+            artifactId targetArtifactId()
+            version = 'latest'
+            artifact latestZip
         }
     }
 }
