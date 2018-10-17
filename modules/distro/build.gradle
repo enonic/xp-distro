@@ -1,7 +1,10 @@
 plugins {
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
+    id 'de.undercouch.download' version '3.4.3'
 }
+
+apply from: 'jdk.gradle'
 
 configurations {
     app
@@ -25,6 +28,83 @@ ext {
     installDir = "$buildDir/install"
     archiveBase = "enonic-xp-$version"
     appLevel = 40
+    downloadJdkDir = "$buildDir/jdk"
+}
+
+task downloadJdk( type: Download ) {
+    description = 'Download JDK.'
+    group = 'Dist'
+
+    onlyIf {
+        !isGenericBuild()
+    }
+
+    dest "$downloadJdkDir/"
+    overwrite false
+    onlyIfModified true
+
+    doFirst {
+        mkdir dest
+        src getJdkDownloadUrl()
+    }
+
+    doLast {
+        tasks.unpackJdk.configure {
+            def jdkPackageFile = getJdkPackageFile()
+            if ( jdkPackageFile.endsWith( '.zip' ) )
+            {
+                def zipFile = file( "$downloadJdkDir/$jdkPackageFile" )
+                from zipTree( zipFile )
+            }
+            else if ( jdkPackageFile.endsWith( '.tar.gz' ) )
+            {
+                def tarFile = resources.gzip( file( "$downloadJdkDir/$jdkPackageFile" ) )
+                from tarTree( tarFile )
+            }
+            else
+            {
+                throw new GradleException( "Unable to unpack JDK: $jdkPackageFile" )
+            }
+        }
+    }
+}
+
+task unpackJdk( type: Copy, dependsOn: downloadJdk ) {
+    description = 'Unpack JDK.'
+    group = 'Dist'
+
+    onlyIf {
+        !isGenericBuild()
+    }
+
+    doFirst {
+        delete file( "$installDir/jdk/" ).listFiles()
+    }
+
+    def outputDir = file( "$installDir/jdk/" )
+    into outputDir
+}
+
+task jdk( dependsOn: unpackJdk ) {
+    description = 'Add JDK to distribution.'
+    group = 'Dist'
+
+    onlyIf {
+        !isGenericBuild()
+    }
+
+    doLast {
+        def targetDir = "$installDir/jdk/"
+        def jdkDirTempFiles = file( targetDir ).listFiles()
+        def jdkHome = findJdkHome( file( targetDir ) )
+
+        jdkHome.traverse( [maxDepth: 0] ) {
+            ant.move file: it, todir: targetDir
+        }
+
+        jdkDirTempFiles.each { File file -> delete( file )
+        }
+    }
 }
 
 task unpackDistro( type: Copy ) {
@@ -34,9 +114,15 @@ task unpackDistro( type: Copy ) {
     into installDir
 }
 
-task copyResources( type: Copy, dependsOn: unpackDistro  ) {
+task copyResources( type: Copy, dependsOn: unpackDistro ) {
     destinationDir = file( installDir )
     from( 'src' )
+
+    if ( isGenericBuild() )
+    {
+        exclude 'bin/setenv.bat'
+        exclude 'bin/setenv.sh'
+    }
 }
 
 task copyApps( type: Copy, dependsOn: copyResources ) {
@@ -46,10 +132,10 @@ task copyApps( type: Copy, dependsOn: copyResources ) {
 
 task copyDist( dependsOn: copyApps )
 
-task distZip( type: Zip, dependsOn: copyDist ) {
+task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
-    baseName = 'distro'
+    baseName = targetArtifactId()
     from installDir
     into archiveBase
 }
@@ -57,19 +143,28 @@ task distZip( type: Zip, dependsOn: copyDist ) {
 task latestZip( type: Zip, dependsOn: copyDist ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
-    baseName = 'distro'
+    baseName = targetArtifactId()
     from installDir
     into archiveBase
 }
 
+build.dependsOn distZip
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenJava( MavenPublication ) {
+            artifactId targetArtifactId()
             artifact distZip
         }
         mavenLatest(MavenPublication) {
+            artifactId targetArtifactId()
             version = 'latest'
             artifact latestZip
         }
     }
+}
+
+def targetArtifactId()
+{
+    return isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
 }

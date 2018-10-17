@@ -1,0 +1,162 @@
+import groovy.json.JsonSlurper
+
+import java.nio.file.FileVisitResult
+
+import static groovy.io.FileType.DIRECTORIES
+
+enum TargetPlatform {
+    WINDOWS( 'windows' ),
+    LINUX( 'linux' ),
+    MAC( 'mac' ),
+    GENERIC( 'generic' )
+
+    final String platform
+
+    TargetPlatform( String value )
+    {
+        this.platform = value
+    }
+
+    String toString()
+    {
+        return this.platform
+    }
+
+    static TargetPlatform from( String value )
+    {
+        value = value == null ? '' : value.toLowerCase()
+
+        if ( value.startsWith( 'windows' ) )
+        {
+            return WINDOWS
+        }
+        else if ( value.startsWith( 'linux' ) )
+        {
+            return LINUX
+        }
+        else if ( value.startsWith( 'mac' ) )
+        {
+            return MAC
+        }
+        else
+        {
+            return GENERIC
+        }
+    }
+}
+
+// Pass command line parameter to specify build target platform. E.g.: gradlew build -Pplatform=mac
+def getPlatform()
+{
+    if ( ext.jdkPlatform != null )
+    {
+        return ext.jdkPlatform
+    }
+
+    def paramJdkPlatform = project.findProperty( 'platform' )
+    if ( paramJdkPlatform == 'current' )
+    {
+        ext.jdkPlatform = TargetPlatform.from( System.getProperty( 'os.name' ) )
+        println "Build target platform: ${ext.jdkPlatform}"
+    }
+    else if ( project.hasProperty( 'platform' ) )
+    {
+        ext.jdkPlatform = TargetPlatform.from( paramJdkPlatform as String )
+        if ( ext.jdkPlatform == TargetPlatform.GENERIC )
+        {
+            throw new GradleException( 'Build target platform not supported: ' + paramJdkPlatform )
+        }
+        println "Build target platform: ${ext.jdkPlatform}"
+    }
+    else
+    {
+        ext.jdkPlatform = TargetPlatform.GENERIC
+    }
+
+    return ext.jdkPlatform
+}
+
+def getJdkPackageFile()
+{
+    return ext.jdkPackageFile
+}
+
+def isWindowsBuild()
+{
+    return getPlatform() == TargetPlatform.WINDOWS
+}
+
+def isLinuxBuild()
+{
+    return getPlatform() == TargetPlatform.LINUX
+}
+
+def isMacBuild()
+{
+    return getPlatform() == TargetPlatform.MAC
+}
+
+def isGenericBuild()
+{
+    return getPlatform() == TargetPlatform.GENERIC
+}
+
+def findJdkHome( File f )
+{
+    def binDir = null
+    f.traverse( type: DIRECTORIES, nameFilter: ~/bin/ ) {
+        binDir = it
+        return FileVisitResult.TERMINATE
+    }
+    if ( binDir == null )
+    {
+        throw new GradleException( 'Could not find JDK home directory in ' + f.absolutePath )
+    }
+    return binDir.getParentFile()
+}
+
+def getJdkDownloadUrl()
+{
+    def JdkInfoUrl = 'https://api.adoptopenjdk.net/v2/info/releases/openjdk11?'
+
+    def params = [openjdk_impl: 'hotspot',
+                  os          : this.getPlatform().toString(),
+                  arch        : 'x64',
+                  release     : 'latest',
+                  type        : 'jdk']
+    def infoUrl = JdkInfoUrl + params.collect { it }.join( '&' )
+    println "Fetching JDK binary builds info from ${infoUrl}"
+
+    def headers = [accept: 'application/json', 'user-agent': 'curl/7.58.0']
+    def jsonText = ''
+    try
+    {
+        jsonText = new URL( infoUrl ).getText( requestProperties: headers )
+    }
+    catch ( e )
+    {
+        throw new GradleException( 'Could not find JDK binary download URL: ' + infoUrl, e )
+    }
+    def json = new JsonSlurper().parseText( jsonText ) as Map
+
+    if ( !( json['binaries'] && json['binaries'][0] ) )
+    {
+        throw new GradleException( 'Could not find JDK binary download URL: ' + json )
+    }
+    def binaryLink = json['binaries'][0]['binary_link']
+    ext.jdkPackageFile = json['binaries'][0]['binary_name']
+    return binaryLink
+}
+
+ext {
+    jdkPlatform = null
+    jdkPackageFile = ''
+    getPlatform = this.&getPlatform
+    getJdkPackageFile = this.&getJdkPackageFile
+    getJdkDownloadUrl = this.&getJdkDownloadUrl
+    isWindowsBuild = this.&isWindowsBuild
+    isLinuxBuild = this.&isLinuxBuild
+    isMacBuild = this.&isMacBuild
+    isGenericBuild = this.&isGenericBuild
+    findJdkHome = this.&findJdkHome
+}
