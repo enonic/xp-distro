@@ -4,15 +4,14 @@ import java.nio.file.FileVisitResult
 
 import static groovy.io.FileType.DIRECTORIES
 
-enum TargetPlatform {
+enum TargetOS {
     WINDOWS( 'windows' ),
     LINUX( 'linux' ),
-    MAC( 'mac' ),
-    GENERIC( 'generic' )
+    MAC( 'mac' )
 
-    final String platform
+    String platform
 
-    TargetPlatform( String value )
+    TargetOS( String value )
     {
         this.platform = value
     }
@@ -22,7 +21,7 @@ enum TargetPlatform {
         return this.platform
     }
 
-    static TargetPlatform from( String value )
+    static TargetOS from( String value )
     {
         value = value == null ? '' : value.toLowerCase()
 
@@ -40,40 +39,101 @@ enum TargetPlatform {
         }
         else
         {
-            return GENERIC
+            return null
         }
     }
 }
 
-// Pass command line parameter to specify build target platform. E.g.: gradlew build -Pplatform=mac
-def getPlatform()
-{
-    if ( ext.jdkPlatform != null )
+enum TargetType {
+    JDK( 'jdk' ),
+    JRE( 'jre' ),
+    GENERIC( 'generic' )
+
+    String type
+
+    TargetType( String value )
     {
-        return ext.jdkPlatform
+        this.type = value
     }
 
-    def paramJdkPlatform = project.findProperty( 'platform' )
-    if ( paramJdkPlatform == 'current' )
+    String toString()
     {
-        ext.jdkPlatform = TargetPlatform.from( System.getProperty( 'os.name' ) )
-        println "Build target platform: ${ext.jdkPlatform}"
+        return this.type
     }
-    else if ( project.hasProperty( 'platform' ) )
+
+    static TargetType from( String value )
     {
-        ext.jdkPlatform = TargetPlatform.from( paramJdkPlatform as String )
-        if ( ext.jdkPlatform == TargetPlatform.GENERIC )
+        value = value == null ? '' : value.trim().toLowerCase()
+        if ( value == 'jdk' )
         {
-            throw new GradleException( 'Build target platform not supported: ' + paramJdkPlatform )
+            return JDK
         }
-        println "Build target platform: ${ext.jdkPlatform}"
+        else if ( value == 'jre' )
+        {
+            return JRE
+        }
+        else if ( value == 'generic' )
+        {
+            return GENERIC
+        }
+        else
+        {
+            return null
+        }
+    }
+}
+
+// Pass command line parameter to specify target OS and build type. E.g.: gradlew build -Pos=mac -Ptype=jre
+def getTargetOS()
+{
+    if ( ext.targetOS != null )
+    {
+        return ext.targetOS
+    }
+
+    def paramTargetOS = project.findProperty( 'os' )
+    if ( paramTargetOS == 'current' || !project.hasProperty( 'os' ) )
+    {
+        ext.targetOS = TargetOS.from( System.getProperty( 'os.name' ) )
+        println "Build target platform: ${ext.targetOS}"
     }
     else
     {
-        ext.jdkPlatform = TargetPlatform.GENERIC
+        ext.targetOS = TargetOS.from( paramTargetOS as String )
+        if ( ext.targetOS == null )
+        {
+            throw new GradleException( 'Build target OS not supported: ' + paramTargetOS )
+        }
+        println "Build target OS: ${ext.targetOS}"
     }
 
-    return ext.jdkPlatform
+    return ext.targetOS
+}
+
+def getTargetType()
+{
+    if ( ext.targetType != null )
+    {
+        return ext.targetType
+    }
+
+    def paramTargetType = project.findProperty( 'type' )
+    if ( project.hasProperty( 'type' ) )
+    {
+        ext.targetType = TargetType.from( paramTargetType as String )
+        if ( ext.targetType == null )
+        {
+            throw new GradleException( 'Build target type not supported: ' + paramTargetType )
+        }
+    }
+    else
+    {
+        ext.targetType = TargetType.GENERIC
+    }
+
+    println "Build target type: ${ext.targetType}"
+
+    return ext.targetType
 }
 
 def getJdkPackageFile()
@@ -81,24 +141,9 @@ def getJdkPackageFile()
     return ext.jdkPackageFile
 }
 
-def isWindowsBuild()
-{
-    return getPlatform() == TargetPlatform.WINDOWS
-}
-
-def isLinuxBuild()
-{
-    return getPlatform() == TargetPlatform.LINUX
-}
-
-def isMacBuild()
-{
-    return getPlatform() == TargetPlatform.MAC
-}
-
 def isGenericBuild()
 {
-    return getPlatform() == TargetPlatform.GENERIC
+    return getTargetType() == TargetType.GENERIC
 }
 
 def findJdkHome( File f )
@@ -120,10 +165,10 @@ def getJdkDownloadUrl()
     def JdkInfoUrl = 'https://api.adoptopenjdk.net/v2/info/releases/openjdk11?'
 
     def params = [openjdk_impl: 'hotspot',
-                  os          : this.getPlatform().toString(),
+                  os          : this.getTargetOS().toString(),
                   arch        : 'x64',
                   release     : 'latest',
-                  type        : 'jdk']
+                  type        : getTargetType().toString()]
     def infoUrl = JdkInfoUrl + params.collect { it }.join( '&' )
     println "Fetching JDK binary builds info from ${infoUrl}"
 
@@ -148,15 +193,19 @@ def getJdkDownloadUrl()
     return binaryLink
 }
 
+def targetArtifactId()
+{
+    return isGenericBuild() ? 'distro' : ( 'distro-' + getTargetOS() + '-' + getTargetType() )
+}
+
 ext {
-    jdkPlatform = null
+    targetOS = null
+    targetType = null
     jdkPackageFile = ''
-    getPlatform = this.&getPlatform
+    getTargetOS = this.&getTargetOS
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl
-    isWindowsBuild = this.&isWindowsBuild
-    isLinuxBuild = this.&isLinuxBuild
-    isMacBuild = this.&isMacBuild
     isGenericBuild = this.&isGenericBuild
+    targetArtifactId = this.&targetArtifactId
     findJdkHome = this.&findJdkHome
 }

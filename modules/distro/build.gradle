@@ -156,15 +156,10 @@ publishing {
             artifactId targetArtifactId()
             artifact distZip
         }
-        mavenLatest(MavenPublication) {
+        mavenLatest( MavenPublication ) {
             artifactId targetArtifactId()
             version = 'latest'
             artifact latestZip
         }
     }
-}
-
-def targetArtifactId()
-{
-    return isGenericBuild() ? 'distro' : ( 'distro-' + getPlatform() )
 }
