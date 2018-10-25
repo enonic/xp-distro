@@ -15,17 +15,23 @@ Set the desired version in `gradle.properties`, and run:
 
 By default it will build a generic build without including the JDK.
 
-To build a distribution that includes the JDK, pass a parameter with the desired platform: linux, mac, windows  
+There are 2 optional parameters:
+- os: `linux` | `mac` | `windows` (by default the current platform)
+- type: `generic` | `jdk` | `jre` (by default `generic`)
+ 
+To build a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows  
 
-    gradle build -Pplatform=linux
+    gradle build -Pos=linux -Ptype=jre
     
-    gradle build -Pplatform=mac
+    gradle build -Pos=mac -Ptype=jdk
     
-    gradle build -Pplatform=windows
+    gradle build -Pos=windows -Ptype=jdk
 
-Pass platform=current to build a distribution for the current platform:
+Omit the os parameter and specify type=jdk or type=jre to build a distribution for the current platform:
 
-    gradle build -Pplatform=current
+    gradle build -Ptype=jdk
+    
+    gradle build -Ptype=jre
 
 ## Running
 
