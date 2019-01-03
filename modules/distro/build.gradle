@@ -19,7 +19,6 @@ dependencies {
     app "${group}:app-main:${vMainApp}@jar"
     app "${group}:app-standardidprovider:${vStdIdProvider}@jar"
     app "${group}:app-applications:${vApplicationsApp}@jar"
-    app "${group}:app-contentstudio:${vContentStudioApp}@jar"
     app "${group}:app-users:${vUsersApp}@jar"
     distro( "${group}:runtime:${vXpRuntime}@zip" )
 }
@@ -140,7 +139,7 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
-task latestZip( type: Zip, dependsOn: copyDist ) {
+task unstableZip( type: Zip, dependsOn: copyDist ) {
     description = 'Build full distribution zip.'
     group = 'Dist'
     baseName = targetArtifactId()
@@ -156,10 +155,10 @@ publishing {
             artifactId targetArtifactId()
             artifact distZip
         }
-        mavenLatest( MavenPublication ) {
+        mavenUnstable( MavenPublication ) {
             artifactId targetArtifactId()
-            version = 'latest'
-            artifact latestZip
+            version = 'unstable'
+            artifact unstableZip
         }
     }
 }
