@@ -20,6 +20,7 @@ dependencies {
     app "${group}:app-standardidprovider:${vStdIdProvider}@jar"
     app "${group}:app-applications:${vApplicationsApp}@jar"
     app "${group}:app-users:${vUsersApp}@jar"
+    app "${group}:app-contentstudio:${vContentStudioApp}@jar"
     distro( "${group}:runtime:${vXpRuntime}@zip" )
 }
 
