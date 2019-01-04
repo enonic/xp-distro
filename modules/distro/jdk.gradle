@@ -45,8 +45,8 @@ enum TargetOS {
 }
 
 enum TargetType {
-    JDK( 'jdk' ),
-    JRE( 'jre' ),
+    SDK( 'sdk' ),
+    SERVER( 'server' ),
     GENERIC( 'generic' )
 
     String type
@@ -61,16 +61,32 @@ enum TargetType {
         return this.type
     }
 
+    String toJdkString()
+    {
+        if ( this == SDK )
+        {
+            return "jdk"
+        }
+        else if ( this == SERVER )
+        {
+            return "jre"
+        }
+        else
+        {
+            return "generic"
+        }
+    }
+
     static TargetType from( String value )
     {
         value = value == null ? '' : value.trim().toLowerCase()
-        if ( value == 'jdk' )
+        if ( value == 'sdk' )
         {
-            return JDK
+            return SDK
         }
-        else if ( value == 'jre' )
+        else if ( value == 'server' )
         {
-            return JRE
+            return SERVER
         }
         else if ( value == 'generic' )
         {
@@ -168,7 +184,7 @@ def getJdkDownloadUrl()
                   os          : this.getTargetOS().toString(),
                   arch        : 'x64',
                   release     : 'latest',
-                  type        : getTargetType().toString()]
+                  type        : getTargetType().toJdkString()]
     def infoUrl = JdkInfoUrl + params.collect { it }.join( '&' )
     println "Fetching JDK binary builds info from ${infoUrl}"
 
@@ -195,7 +211,7 @@ def getJdkDownloadUrl()
 
 def targetArtifactId()
 {
-    return isGenericBuild() ? 'distro' : ( 'distro-' + getTargetOS() + '-' + getTargetType() )
+    return isGenericBuild() ? 'enonic-xp-generic' : ( 'enonic-xp-' + getTargetOS() + '-' + getTargetType() )
 }
 
 ext {
