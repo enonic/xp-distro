@@ -156,10 +156,13 @@ publishing {
             artifactId targetArtifactId()
             artifact distZip
         }
-        mavenUnstable( MavenPublication ) {
-            artifactId targetArtifactId()
-            version = 'unstable'
-            artifact unstableZip
+        if ( isGenericBuild() )
+        {
+            mavenUnstable( MavenPublication ) {
+                artifactId targetArtifactId()
+                version = 'unstable'
+                artifact unstableZip
+            }
         }
     }
 }
