@@ -25,7 +25,7 @@ dependencies {
 
 ext {
     installDir = "$buildDir/install"
-    archiveBase = "enonic-xp-$version"
+    archiveBase = targetArtifactId() + "-$version"
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
 }
