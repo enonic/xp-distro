@@ -17,21 +17,22 @@ By default it will build a generic build without including the JDK.
 
 There are 2 optional parameters:
 - os: `linux` | `mac` | `windows` (by default the current platform)
-- type: `generic` | `jdk` | `jre` (by default `generic`)
+- type: `generic` | `sdk` | `server` (by default `generic`)
  
-To build a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows  
+To build a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows.
+The type should be 'sdk' to include the JDK and 'server' to include the JRE.
 
-    gradle build -Pos=linux -Ptype=jre
+    gradle build -Pos=linux -Ptype=server
     
-    gradle build -Pos=mac -Ptype=jdk
+    gradle build -Pos=mac -Ptype=sdk
     
-    gradle build -Pos=windows -Ptype=jdk
+    gradle build -Pos=windows -Ptype=sdk
 
-Omit the os parameter and specify type=jdk or type=jre to build a distribution for the current platform:
+Omit the os parameter and specify type=sdk or type=server to build a distribution for the current platform:
 
-    gradle build -Ptype=jdk
+    gradle build -Ptype=sdk
     
-    gradle build -Ptype=jre
+    gradle build -Ptype=server
 
 ## Running
 
