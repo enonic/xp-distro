@@ -27,7 +27,7 @@ ext {
     installDir = "$buildDir/install"
     archiveBase = targetArtifactId() + "-$version"
     appLevel = 40
-    downloadJdkDir = "$buildDir/java"
+    downloadJdkDir = "$buildDir/jdk"
 }
 
 task downloadJdk( type: Download ) {
