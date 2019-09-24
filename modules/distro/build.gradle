@@ -155,7 +155,7 @@ publishing {
             artifactId targetArtifactId()
             artifact distZip
         }
-        if ( isGenericBuild() )
+        if ( isUnstableBuild() )
         {
             mavenUnstable( MavenPublication ) {
                 artifactId targetArtifactId()
