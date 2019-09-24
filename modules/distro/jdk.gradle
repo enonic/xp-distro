@@ -162,6 +162,11 @@ def isGenericBuild()
     return getTargetType() == TargetType.GENERIC
 }
 
+def isUnstableBuild()
+{
+    return isGenericBuild() && (getBranchName() == 'master')
+}
+
 def findJdkHome( File f )
 {
     def binDir = null
@@ -214,6 +219,15 @@ def targetArtifactId()
     return isGenericBuild() ? 'enonic-xp-generic' : ( 'enonic-xp-' + getTargetOS() + '-' + getTargetType() )
 }
 
+def getBranchName() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch
+}
+
 ext {
     targetOS = null
     targetType = null
@@ -222,6 +236,7 @@ ext {
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl
     isGenericBuild = this.&isGenericBuild
+    isUnstableBuild = this.&isUnstableBuild
     targetArtifactId = this.&targetArtifactId
     findJdkHome = this.&findJdkHome
 }
