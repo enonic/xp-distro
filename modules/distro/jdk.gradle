@@ -164,7 +164,7 @@ def isGenericBuild()
 
 def isUnstableBuild()
 {
-    return isGenericBuild() && (getBranchName() == 'master')
+    return isGenericBuild() && (getBranch().startsWith( 'master' ) )
 }
 
 def findJdkHome( File f )
@@ -219,7 +219,7 @@ def targetArtifactId()
     return isGenericBuild() ? 'enonic-xp-generic' : ( 'enonic-xp-' + getTargetOS() + '-' + getTargetType() )
 }
 
-def getBranchName() {
+def getBranch() {
     def branch = ""
     def proc = "git rev-parse --abbrev-ref HEAD".execute()
     proc.in.eachLine { line -> branch = line }
