@@ -225,6 +225,7 @@ def getBranch() {
     proc.in.eachLine { line -> branch = line }
     proc.err.eachLine { line -> println line }
     proc.waitFor()
+    println "Working on branch: " + branch
     branch
 }
 
