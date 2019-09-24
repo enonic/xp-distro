@@ -164,7 +164,7 @@ def isGenericBuild()
 
 def isUnstableBuild()
 {
-    return isGenericBuild() && (getBranchName() == 'master')
+    return isGenericBuild() && (getBranchName().startsWith('master'))
 }
 
 def findJdkHome( File f )
@@ -225,6 +225,7 @@ def getBranchName() {
     proc.in.eachLine { line -> branch = line }
     proc.err.eachLine { line -> println line }
     proc.waitFor()
+    println "Working on branch: " + branch
     branch
 }
 
