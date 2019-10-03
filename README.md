@@ -2,8 +2,8 @@
 
 Welcome to the home of Enonic XP.  To get started, please read our docs here: http://xp.readthedocs.org.
 
-This project bundles the runtime (https://github.com/enonic/xp) with the admin applications (https://github.com/enonic/xp-apps)
-that are necessary to use XP in a meaningful way.
+This project bundles the runtime (https://github.com/enonic/xp) with admin applications
+(app-admin-home, app-applications, app-standardidprovider and app-users) that are necessary to use XP in a meaningful way.
 
 ## Building
 
