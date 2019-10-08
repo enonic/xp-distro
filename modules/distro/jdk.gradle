@@ -152,6 +152,31 @@ def getTargetType()
     return ext.targetType
 }
 
+def getBuildUnstable()
+{
+    if ( ext.targetBuildUnstable != null )
+    {
+        return ext.targetBuildUnstable
+    }
+
+    if ( project.hasProperty( 'buildUnstable' ) )
+    {
+        ext.targetBuildUnstable = new Boolean( 'true' )
+    }
+    else
+    {
+        ext.targetBuildUnstable = new Boolean( 'false' )
+    }
+
+    if ( ext.targetBuildUnstable )
+    {
+        println "Creating an additional unstable build."
+    }
+
+    println "Build unstable: ${ext.targetBuildUnstable}"
+    return ext.targetBuildUnstable
+}
+
 def getJdkPackageFile()
 {
     return ext.jdkPackageFile
@@ -164,7 +189,7 @@ def isGenericBuild()
 
 def isUnstableBuild()
 {
-    return isGenericBuild() && (getBranch().startsWith( 'master' ) )
+    return ( isGenericBuild() && getBuildUnstable() )
 }
 
 def findJdkHome( File f )
@@ -219,19 +244,10 @@ def targetArtifactId()
     return isGenericBuild() ? 'enonic-xp-generic' : ( 'enonic-xp-' + getTargetOS() + '-' + getTargetType() )
 }
 
-def getBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    println "Working on branch: " + branch
-    branch
-}
-
 ext {
     targetOS = null
     targetType = null
+    targetBuildUnstable = null
     jdkPackageFile = ''
     getTargetOS = this.&getTargetOS
     getJdkPackageFile = this.&getJdkPackageFile
