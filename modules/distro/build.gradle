@@ -155,13 +155,5 @@ publishing {
             artifactId targetArtifactId()
             artifact distZip
         }
-        if ( isUnstableBuild() )
-        {
-            mavenUnstable( MavenPublication ) {
-                artifactId targetArtifactId()
-                version = 'unstable'
-                artifact unstableZip
-            }
-        }
     }
 }

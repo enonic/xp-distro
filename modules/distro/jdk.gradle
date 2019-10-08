@@ -162,11 +162,6 @@ def isGenericBuild()
     return getTargetType() == TargetType.GENERIC
 }
 
-def isUnstableBuild()
-{
-    return isGenericBuild() && (getBranchName().startsWith('master'))
-}
-
 def findJdkHome( File f )
 {
     def binDir = null
