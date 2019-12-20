@@ -4,153 +4,7 @@ import java.nio.file.FileVisitResult
 
 import static groovy.io.FileType.DIRECTORIES
 
-enum TargetOS {
-    WINDOWS( 'windows' ),
-    LINUX( 'linux' ),
-    MAC( 'mac' )
-
-    String platform
-
-    TargetOS( String value )
-    {
-        this.platform = value
-    }
-
-    String toString()
-    {
-        return this.platform
-    }
-
-    static TargetOS from( String value )
-    {
-        value = value == null ? '' : value.toLowerCase()
-
-        if ( value.startsWith( 'windows' ) )
-        {
-            return WINDOWS
-        }
-        else if ( value.startsWith( 'linux' ) )
-        {
-            return LINUX
-        }
-        else if ( value.startsWith( 'mac' ) )
-        {
-            return MAC
-        }
-        else
-        {
-            return null
-        }
-    }
-}
-
-enum TargetType {
-    SDK( 'sdk' ),
-    SERVER( 'server' ),
-    GENERIC( 'generic' )
-
-    String type
-
-    TargetType( String value )
-    {
-        this.type = value
-    }
-
-    String toString()
-    {
-        return this.type
-    }
-
-    String toJdkString()
-    {
-        if ( this == SDK )
-        {
-            return "jdk"
-        }
-        else if ( this == SERVER )
-        {
-            return "jre"
-        }
-        else
-        {
-            return "generic"
-        }
-    }
-
-    static TargetType from( String value )
-    {
-        value = value == null ? '' : value.trim().toLowerCase()
-        if ( value == 'sdk' )
-        {
-            return SDK
-        }
-        else if ( value == 'server' )
-        {
-            return SERVER
-        }
-        else if ( value == 'generic' )
-        {
-            return GENERIC
-        }
-        else
-        {
-            return null
-        }
-    }
-}
-
-// Pass command line parameter to specify target OS and build type. E.g.: gradlew build -Pos=mac -Ptype=jre
-def getTargetOS()
-{
-    if ( ext.targetOS != null )
-    {
-        return ext.targetOS
-    }
-
-    def paramTargetOS = project.findProperty( 'os' )
-    if ( paramTargetOS == 'current' || !project.hasProperty( 'os' ) )
-    {
-        ext.targetOS = TargetOS.from( System.getProperty( 'os.name' ) )
-        println "Build target platform: ${ext.targetOS}"
-    }
-    else
-    {
-        ext.targetOS = TargetOS.from( paramTargetOS as String )
-        if ( ext.targetOS == null )
-        {
-            throw new GradleException( 'Build target OS not supported: ' + paramTargetOS )
-        }
-        println "Build target OS: ${ext.targetOS}"
-    }
-
-    return ext.targetOS
-}
-
-def getTargetType()
-{
-    if ( ext.targetType != null )
-    {
-        return ext.targetType
-    }
-
-    def paramTargetType = project.findProperty( 'type' )
-    if ( project.hasProperty( 'type' ) )
-    {
-        ext.targetType = TargetType.from( paramTargetType as String )
-        if ( ext.targetType == null )
-        {
-            throw new GradleException( 'Build target type not supported: ' + paramTargetType )
-        }
-    }
-    else
-    {
-        ext.targetType = TargetType.GENERIC
-    }
-
-    println "Build target type: ${ext.targetType}"
-
-    return ext.targetType
-}
+apply from: 'shared.gradle'
 
 def getBuildUnstable()
 {
@@ -161,11 +15,11 @@ def getBuildUnstable()
 
     if ( project.hasProperty( 'buildUnstable' ) )
     {
-        ext.targetBuildUnstable = new Boolean( 'true' )
+        ext.targetBuildUnstable = Boolean.TRUE
     }
     else
     {
-        ext.targetBuildUnstable = new Boolean( 'false' )
+        ext.targetBuildUnstable = Boolean.FALSE
     }
 
     if ( ext.targetBuildUnstable )
@@ -180,11 +34,6 @@ def getBuildUnstable()
 def getJdkPackageFile()
 {
     return ext.jdkPackageFile
-}
-
-def isGenericBuild()
-{
-    return getTargetType() == TargetType.GENERIC
 }
 
 def isUnstableBuild()
@@ -211,7 +60,7 @@ def getJdkDownloadUrl()
     def JdkInfoUrl = 'https://api.adoptopenjdk.net/v2/info/releases/openjdk11?'
 
     def params = [openjdk_impl: 'hotspot',
-                  os          : this.getTargetOS().toString(),
+                  os          : getTargetOS().toString(),
                   arch        : 'x64',
                   release     : 'latest',
                   type        : getTargetType().toJdkString()]
@@ -245,14 +94,10 @@ def targetArtifactId()
 }
 
 ext {
-    targetOS = null
-    targetType = null
     targetBuildUnstable = null
     jdkPackageFile = ''
-    getTargetOS = this.&getTargetOS
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl
-    isGenericBuild = this.&isGenericBuild
     isUnstableBuild = this.&isUnstableBuild
     targetArtifactId = this.&targetArtifactId
     findJdkHome = this.&findJdkHome

@@ -1,0 +1,61 @@
+import java.nio.file.FileVisitResult
+
+import static groovy.io.FileType.DIRECTORIES
+
+apply from: 'shared.gradle'
+
+def getElasticDownloadUrl()
+{
+    def os = getTargetOS().toString();
+
+    def downloadUrlBase = "https://artifacts.elastic.co/downloads/elasticsearch/"
+    
+    if ( os == 'mac' )
+    {
+        ext.elasticPackageFile = "elasticsearch-oss-${vElasticsearch}-darwin-x86_64.tar.gz"
+    }
+    else if ( os == 'linux' )
+    {
+        ext.elasticPackageFile = "elasticsearch-oss-${vElasticsearch}-linux-x86_64.tar.gz"
+    }
+    else if ( os == 'windows' )
+    {
+        ext.elasticPackageFile = "elasticsearch-oss-${vElasticsearch}-windows-x86_64.zip"
+    }
+    else
+    {
+        throw new GradleException( 'Unsupported operation system.' )
+    }
+
+    def downloadUrl = downloadUrlBase + ext.elasticPackageFile;
+
+    println "Fetching Elasticsearch from ${downloadUrl}"
+
+    return downloadUrl;
+}
+
+def getElasticPackageFile()
+{
+    return ext.elasticPackageFile
+}
+
+def findElasticHome( File f )
+{
+    def binDir = null
+    f.traverse( type: DIRECTORIES, nameFilter: ~/bin/ ) {
+        binDir = it
+        return FileVisitResult.TERMINATE
+    }
+    if ( binDir == null )
+    {
+        throw new GradleException( 'Could not find Elasticsearch home directory in ' + f.absolutePath )
+    }
+    return binDir.getParentFile()
+}
+
+ext {
+    elasticPackageFile = ''
+    getElasticDownloadUrl = this.&getElasticDownloadUrl
+    getElasticPackageFile = this.&getElasticPackageFile
+    findElasticHome = this.&findElasticHome
+}

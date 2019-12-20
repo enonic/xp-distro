@@ -4,7 +4,9 @@ plugins {
     id 'de.undercouch.download' version '3.4.3'
 }
 
+apply from: 'shared.gradle'
 apply from: 'jdk.gradle'
+apply from: 'elasticsearch.gradle'
 
 configurations {
     app
@@ -28,6 +30,84 @@ ext {
     archiveBase = targetArtifactId() + "-$version"
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
+    downloadElasticsearchDir = "$buildDir/elasticsearch"
+}
+
+task downloadElasticsearch( type: Download ) {
+    description = 'Download Elasticsearch.'
+    group = 'Dist'
+
+    onlyIf {
+        isSdk()
+    }
+
+    dest "$downloadElasticsearchDir/"
+    overwrite false
+    onlyIfModified true
+
+    doFirst {
+        mkdir dest
+        src getElasticDownloadUrl()
+    }
+
+    doLast {
+        tasks.unpackElasticsearch.configure {
+            def elasticPackageFile = getElasticPackageFile()
+
+            if ( elasticPackageFile.endsWith( '.zip' ) )
+            {
+                def zipFile = file( "$downloadElasticsearchDir/$elasticPackageFile" )
+                from zipTree( zipFile )
+            }
+            else if ( elasticPackageFile.endsWith( '.tar.gz' ) )
+            {
+                def tarFile = resources.gzip( file( "$downloadElasticsearchDir/$elasticPackageFile" ) )
+                from tarTree( tarFile )
+            }
+            else
+            {
+                throw new GradleException( "Unable to unpack Elasticsearch: $elasticPackageFile" )
+            }
+        }
+    }
+}
+
+task unpackElasticsearch( type: Copy, dependsOn: downloadElasticsearch ) {
+    description = 'Unpack Elasticsearch.'
+    group = 'Dist'
+
+    onlyIf {
+        isSdk()
+    }
+
+    doFirst {
+        delete file( "$installDir/elasticsearch/" ).listFiles()
+    }
+
+    def outputDir = file( "$installDir/elasticsearch/" )
+    into outputDir
+}
+
+task elasticsearch( dependsOn: unpackElasticsearch ) {
+    description = 'Add Elasticsearch to distribution.'
+    group = 'Dist'
+
+    onlyIf {
+        !isGenericBuild()
+    }
+
+    doLast {
+        def targetDir = "$installDir/elasticsearch/"
+        def tempFiles = file( targetDir ).listFiles()
+        def elasticHome = findElasticHome( file( targetDir ) )
+
+        elasticHome.traverse( [maxDepth: 0] ) {
+            ant.move file: it, todir: targetDir
+        }
+
+        tempFiles.each { File file -> delete( file )
+        }
+    }
 }
 
 task downloadJdk( type: Download ) {
@@ -131,7 +211,15 @@ task copyApps( type: Copy, dependsOn: copyResources ) {
 
 task copyDist( dependsOn: copyApps )
 
-task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
+task distZip( type: Zip ) {
+    if ( isSdk() )
+    {
+        dependsOn( copyDist, jdk, elasticsearch )
+    }
+    else
+    {
+        dependsOn( copyDist, jdk )
+    }
     description = 'Build full distribution zip.'
     group = 'Dist'
     baseName = targetArtifactId()
