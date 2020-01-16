@@ -30,6 +30,9 @@ rem SET JAVA_OPTS
 rem Java debug options
 rem SET JAVA_DEBUG_OPTS
 
+rem Location of ElasticSearch installation
+rem SET ES_HOME
+
 rem Enonic XP home folder
 rem SET XP_HOME
 
@@ -47,3 +50,14 @@ set JAVA_HOME=%CD%
 popd
 
 set PATH="%JAVA_HOME%\bin;%PATH%";
+
+rem Set ES_HOME pointing to the embedded Elasticsearch
+pushd %~dp0
+set SCRIPT_DIR=%CD%
+popd
+
+pushd %SCRIPT_DIR%\..\elasticsearch
+set ES_HOME=%CD%
+popd
+
+set PATH="%ES_HOME%\bin;%PATH%";

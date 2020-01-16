@@ -31,3 +31,7 @@
 # Set JAVA_HOME pointing to the embedded JDK
 export JAVA_HOME=$(cd "$(dirname "$0")/../jdk"; pwd)
 export PATH="$JAVA_HOME/bin:$PATH"
+
+# Set ES_HOME pointing to the embedded Elastic Search
+export ES_HOME=$(cd "$(dirname "$0")/../elasticsearch"; pwd)
+export PATH="$ES_HOME/bin:$PATH"
