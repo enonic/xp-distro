@@ -51,13 +51,9 @@ popd
 
 set PATH="%JAVA_HOME%\bin;%PATH%";
 
-rem Set ES_HOME pointing to the embedded Elasticsearch
-pushd %~dp0
-set SCRIPT_DIR=%CD%
-popd
-
-pushd %SCRIPT_DIR%\..\elasticsearch
-set ES_HOME=%CD%
-popd
-
-set PATH="%ES_HOME%\bin;%PATH%";
+if defined XP_BUNDLED_ES (
+   if %XP_BUNDLED_ES% == "true" (
+        set ES_HOME=%SCRIPT_DIR%\..\elasticsearch
+        set PATH="%ES_HOME%\bin;%PATH%";
+   )
+)

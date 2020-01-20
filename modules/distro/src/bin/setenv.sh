@@ -32,6 +32,10 @@
 export JAVA_HOME=$(cd "$(dirname "$0")/../jdk"; pwd)
 export PATH="$JAVA_HOME/bin:$PATH"
 
-# Set ES_HOME pointing to the embedded Elastic Search
-export ES_HOME=$(cd "$(dirname "$0")/../elasticsearch"; pwd)
-export PATH="$ES_HOME/bin:$PATH"
+export XP_BUNDLED_ES="@xpBundledEs@"
+
+if [[ -n $XP_BUNDLED_ES && "$XP_BUNDLED_ES" = 'true' ]]; then
+    # Set ES_HOME pointing to the embedded Elastic Search
+    export ES_HOME=$(cd "$(dirname "$0")/../elasticsearch"; pwd)
+    export PATH="$ES_HOME/bin:$PATH"
+fi
