@@ -39,20 +39,17 @@ rem SET XP_HOME
 rem Additional available Enonic XP options
 rem SET XP_OPTS
 
-
-rem Set JAVA_HOME pointing to the embedded JDK
 pushd %~dp0
 set SCRIPT_DIR=%CD%
 popd
 
-pushd %SCRIPT_DIR%\..\jdk
-set JAVA_HOME=%CD%
-popd
-
+rem Set JAVA_HOME pointing to the embedded JDK
+set JAVA_HOME=%SCRIPT_DIR%\..\jdk
 set PATH="%JAVA_HOME%\bin;%PATH%";
 
 if defined XP_BUNDLED_ES (
    if %XP_BUNDLED_ES% == "true" (
+        rem Set ES_HOME pointing to the embedded Elasticsearch
         set ES_HOME=%SCRIPT_DIR%\..\elasticsearch
         set PATH="%ES_HOME%\bin;%PATH%";
    )
