@@ -1,0 +1,36 @@
+plugins {
+    id 'com.bmuschko.docker-remote-api' version '3.1.0'
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerInspectImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+
+docker {
+    registryCredentials {
+        username = project.findProperty( 'dockerUser' )
+        email = project.findProperty( 'dockerEmail' )
+        password = project.findProperty( 'dockerPassword' )
+    }
+}
+
+task copyDist( type: Copy ) {
+    from "$rootDir/modules/distro/build/install"
+    into "$buildDir/distro"
+    dependsOn( ':distro:copyDist' )
+}
+
+task dockerBuild( type: DockerBuildImage, dependsOn: copyDist ) {
+    inputDir project.projectDir
+    dockerFile file( "$projectDir/Dockerfile" )
+    tags = ['enonic/xp-base', "enonic/xp-base:$version".toString()]
+}
+
+task dockerInspect( type: DockerInspectImage, dependsOn: dockerBuild ) {
+    targetImageId { dockerBuild.getImageId() }
+}
+
+task dockerPush( type: DockerPushImage, dependsOn: dockerInspect ) {
+    imageName 'enonic/xp-base'
+    tag "$version"
+}
