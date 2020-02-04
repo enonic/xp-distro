@@ -140,7 +140,7 @@ task copyApps( type: Copy, dependsOn: copyResources ) {
     into "$installDir/system/$appLevel"
 }
 
-task copyDist( dependsOn: copyApps )
+task copyDist( dependsOn: ['copyApps', 'copyResources'] )
 
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip.'
@@ -148,6 +148,28 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     baseName = targetArtifactId()
     from installDir
     into archiveBase
+}
+
+task distTar( type: Tar, dependsOn: [copyDist] ) {
+    description = 'Build full distribution tar.'
+    group = 'Dist'
+    baseName = targetArtifactId()
+    compression = Compression.GZIP
+    extension = 'tar.gz'
+    into archiveBase
+
+    from( installDir ) {
+
+        exclude ('**/bin/*.sh')
+
+    }
+
+    from ( installDir ) {
+
+        include ('**/bin/*.sh')
+
+        fileMode 0755
+    }
 }
 
 task unstableZip( type: Zip, dependsOn: copyDist ) {
@@ -158,7 +180,7 @@ task unstableZip( type: Zip, dependsOn: copyDist ) {
     into archiveBase
 }
 
-build.dependsOn distZip
+build.dependsOn distTar
 
 publishing {
     publications {
