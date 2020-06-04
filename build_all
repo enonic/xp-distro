@@ -1,8 +1,8 @@
+./gradlew clean build publish
 ./gradlew -Pos=linux -Ptype=server clean build publish
 ./gradlew -Pos=linux -Ptype=sdk clean build publish
 ./gradlew -Pos=mac -Ptype=sdk clean build publish
 ./gradlew -Pos=mac -Ptype=server clean build publish
 ./gradlew -Pos=windows -Ptype=sdk clean build publish
 ./gradlew -Pos=windows -Ptype=server clean build publish
-./gradlew clean build publish
 
