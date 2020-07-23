@@ -37,7 +37,7 @@ jobs:
 
       - name: Publish to snapshot repository
         if: "contains(steps.read_version.outputs.value, '-SNAPSHOT') && (github.ref == 'refs/heads/master' || contains(github.ref, 'refs/heads/7.'))"
-        run: ./gradlew publish -Pos==${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=snapshot -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=snapshot -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
 
       #- name: Publish to release repository
       #  if: "!contains(steps.read_version.outputs.value, '-SNAPSHOT') && contains(github.ref, 'refs/heads/7.')"
