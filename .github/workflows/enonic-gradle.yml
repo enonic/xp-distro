@@ -4,13 +4,13 @@ on: [push]
 
 jobs:
   build:
-  strategy:
-    matrix:
-      type: [sdk, server]
-      os: [macos, linux, windows]
-      include:
-        - type: generic
-          os: linux
+    strategy:
+      matrix:
+        type: [sdk, server]
+        os: [macos, linux, windows]
+        include:
+          - type: generic
+            os: linux
 
     runs-on: ubuntu-latest
 
