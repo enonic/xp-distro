@@ -11,7 +11,7 @@ repositories {
     mavenLocal()
     jcenter()
     maven {
-        url 'http://repo.enonic.com/public'
+        url 'http://repo.enonic.com/dev'
     }
 }
 
@@ -25,6 +25,12 @@ configurations {
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
+
+def vXpRuntime=version
+def vUsersApp=version
+def vApplicationsApp=version
+def vStdIdProvider=version
+def vMainApp=version
 
 dependencies {
     app "${group}:app-main:${vMainApp}@jar"
