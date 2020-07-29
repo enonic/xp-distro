@@ -58,7 +58,7 @@ jobs:
         run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ steps.get_publish_vars.outputs.repo }} -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
 
       - name: Create Release
-        if: steps.get_publish_vars.outputs.release == 'true' && matrix.type == generic
+        if: steps.get_publish_vars.outputs.release == 'true' && matrix.type == 'generic'
         id: create_release
         uses: actions/create-release@v1
         env:
