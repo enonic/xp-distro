@@ -156,14 +156,6 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
-task unstableZip( type: Zip, dependsOn: copyDist ) {
-    description = 'Build full distribution zip.'
-    group = 'Dist'
-    baseName = targetArtifactId()
-    from installDir
-    into archiveBase
-}
-
 build.dependsOn distZip
 
 publishing {
@@ -171,14 +163,6 @@ publishing {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
             artifact distZip
-        }
-        if ( isUnstableBuild() )
-        {
-            mavenUnstable( MavenPublication ) {
-                artifactId targetArtifactId()
-                version = 'unstable'
-                artifact unstableZip
-            }
         }
     }
 }

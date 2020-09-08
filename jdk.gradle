@@ -152,31 +152,6 @@ def getTargetType()
     return ext.targetType
 }
 
-def getBuildUnstable()
-{
-    if ( ext.targetBuildUnstable != null )
-    {
-        return ext.targetBuildUnstable
-    }
-
-    if ( project.hasProperty( 'buildUnstable' ) )
-    {
-        ext.targetBuildUnstable = new Boolean( 'true' )
-    }
-    else
-    {
-        ext.targetBuildUnstable = new Boolean( 'false' )
-    }
-
-    if ( ext.targetBuildUnstable )
-    {
-        println "Creating an additional unstable build."
-    }
-
-    println "Build unstable: ${ext.targetBuildUnstable}"
-    return ext.targetBuildUnstable
-}
-
 def getJdkPackageFile()
 {
     return ext.jdkPackageFile
@@ -185,11 +160,6 @@ def getJdkPackageFile()
 def isGenericBuild()
 {
     return getTargetType() == TargetType.GENERIC
-}
-
-def isUnstableBuild()
-{
-    return ( isGenericBuild() && getBuildUnstable() )
 }
 
 def findJdkHome( File f )
@@ -247,13 +217,11 @@ def targetArtifactId()
 ext {
     targetOS = null
     targetType = null
-    targetBuildUnstable = null
     jdkPackageFile = ''
     getTargetOS = this.&getTargetOS
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl
     isGenericBuild = this.&isGenericBuild
-    isUnstableBuild = this.&isUnstableBuild
     targetArtifactId = this.&targetArtifactId
     findJdkHome = this.&findJdkHome
 }
