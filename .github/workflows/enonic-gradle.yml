@@ -66,23 +66,6 @@ jobs:
           release_name: Enonic XP Distro ${{ steps.publish_vars.outputs.version }}
           prerelease: ${{ steps.publish_vars.outputs.prerelease == 'true' }}
 
-      - name: Write new snapshot version
-        if: steps.publish_vars.outputs.release == 'true' && matrix.type == 'generic'
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: './gradle.properties'
-          property: 'version'
-          value: ${{ steps.publish_vars.outputs.nextSnapshot }}
-
-      - name: Commit and push new version
-        if: steps.publish_vars.outputs.release == 'true' && matrix.type == 'generic'
-        uses: EndBug/add-and-commit@v4
-        with:
-          add: ./gradle.properties
-          message: 'Updated to next SNAPSHOT version'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   release_notes:
     strategy:
       matrix:
