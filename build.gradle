@@ -1,8 +1,12 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id 'base'
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
     id 'de.undercouch.download' version '4.1.1'
+    id 'nebula.deb' version '8.4.1'
+    id 'nebula.rpm' version '8.4.1'
 }
 
 group = 'com.enonic.xp'
@@ -149,21 +153,57 @@ task copyApps( type: Copy, dependsOn: copyResources ) {
 
 task copyDist( dependsOn: copyApps )
 
+task distTar( type: Tar, dependsOn: [copyDist, jdk] ) {
+    description = 'Build full distribution tar.gz'
+    group = 'Dist'
+    baseName = targetArtifactId()
+    compression = Compression.GZIP
+    from installDir
+    into archiveBase
+}
+
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
-    description = 'Build full distribution zip.'
+    description = 'Build full distribution zip'
     group = 'Dist'
     baseName = targetArtifactId()
     from installDir
     into archiveBase
 }
 
-build.dependsOn distZip
+task distDeb( type: Deb, dependsOn: [copyDist, jdk] ) {
+    description = 'Build full distribution DEB package'
+    packageName = targetArtifactId()
+    version = version
+    arch = 'X86_64'
+    os = 'LINUX'
+    from installDir
+    into archiveBase
+}
+
+task distRpm( type: Rpm, dependsOn: [copyDist, jdk] ) {
+    description = 'Build full distribution RPM package'
+    packageName = targetArtifactId()
+    version = version
+    arch = 'X86_64'
+    os = 'LINUX'
+    from installDir
+    into archiveBase
+}
+
+if ( Os.isFamily( Os.FAMILY_UNIX ) ) {
+    build.dependsOn distTar
+} else {
+    build.dependsOn distZip
+}
 
 publishing {
     publications {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
             artifact distZip
+            artifact distTar
+            artifact distDeb
+            artifact distRpm
         }
     }
 }
