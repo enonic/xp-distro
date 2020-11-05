@@ -1,12 +1,8 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 plugins {
     id 'base'
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
     id 'de.undercouch.download' version '4.1.1'
-    id 'nebula.deb' version '8.4.1'
-    id 'nebula.rpm' version '8.4.1'
 }
 
 group = 'com.enonic.xp'
@@ -49,6 +45,10 @@ ext {
     archiveBase = targetArtifactId() + "-$version"
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
+}
+
+def isLinux() {
+    return hasProperty( 'os' ) ? (os == 'linux') : false
 }
 
 task downloadJdk( type: Download ) {
@@ -173,27 +173,7 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
-task distDeb( type: Deb, dependsOn: [copyDist, jdk] ) {
-    description = 'Build full distribution DEB package'
-    packageName = targetArtifactId()
-    version = version
-    arch = 'X86_64'
-    os = 'LINUX'
-    from installDir
-    into archiveBase
-}
-
-task distRpm( type: Rpm, dependsOn: [copyDist, jdk] ) {
-    description = 'Build full distribution RPM package'
-    packageName = targetArtifactId()
-    version = version
-    arch = 'X86_64'
-    os = 'LINUX'
-    from installDir
-    into archiveBase
-}
-
-if ( Os.isFamily( Os.FAMILY_UNIX ) ) {
+if ( isLinux() ) {
     build.dependsOn distTar
 } else {
     build.dependsOn distZip
@@ -203,10 +183,7 @@ publishing {
     publications {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
-            artifact distZip
-            artifact distTar
-            artifact distDeb
-            artifact distRpm
+            artifact isLinux() ? distTar : distZip
         }
     }
 }
