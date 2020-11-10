@@ -2,7 +2,7 @@ plugins {
     id 'base'
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
-    id 'de.undercouch.download' version '3.4.3'
+    id 'de.undercouch.download' version '4.1.1'
 }
 
 group = 'com.enonic.xp'
@@ -55,13 +55,14 @@ task downloadJdk( type: Download ) {
         !isGenericBuild()
     }
 
-    dest "$downloadJdkDir/"
     overwrite false
     onlyIfModified true
 
+    src getJdkDownloadUrl()
+    dest new File( downloadJdkDir, jdkPackageFile )
+
     doFirst {
-        mkdir dest
-        src getJdkDownloadUrl()
+        mkdir downloadJdkDir
     }
 
     doLast {
