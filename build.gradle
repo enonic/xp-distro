@@ -59,7 +59,7 @@ task downloadJdk( type: Download ) {
     onlyIfModified true
 
     src getJdkDownloadUrl()
-    dest new File( downloadJdkDir, jdkPackageFile )
+    dest new File( downloadJdkDir, getJdkPackageFile() )
 
     doFirst {
         mkdir downloadJdkDir
