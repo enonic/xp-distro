@@ -170,17 +170,20 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     into archiveBase
 }
 
+build.dependsOn distZip
+
 if ( isLinux() ) {
     build.dependsOn distTar
-} else {
-    build.dependsOn distZip
 }
 
 publishing {
     publications {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
-            artifact isLinux() ? distTar : distZip
+            if ( isLinux() ) {
+                artifact distTar
+            }
+            artifact distZip
         }
     }
 }
