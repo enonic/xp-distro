@@ -182,12 +182,12 @@ def getJdkDownloadUrl()
 
     def params = [architecture: 'x64',
                   heap_size   : 'normal',
-                  image_type  : 'jdk',
+                  image_type  : this.getTargetType().toJdkString(),
                   jvm_impl    : 'hotspot',
                   os          : this.getTargetOS().toString(),
                   page        : 0,
                   page_size   : 1,
-                  project     : this.getTargetType().toJdkString(),
+                  project     : 'jdk',
                   sort_method : 'DATE',
                   sort_order  : 'DESC',
                   vendor      : 'adoptopenjdk']
