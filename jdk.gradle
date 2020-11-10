@@ -178,14 +178,21 @@ def findJdkHome( File f )
 
 def getJdkDownloadUrl()
 {
-    def JdkInfoUrl = 'https://api.adoptopenjdk.net/v2/info/releases/openjdk11?'
+    def jdkInfoUrl = 'https://api.adoptopenjdk.net/v3/assets/feature_releases/8/ga?'
 
-    def params = [openjdk_impl: 'hotspot',
+    def params = [architecture: 'x64',
+                  heap_size   : 'normal',
+                  image_type  : 'jdk',
+                  jvm_impl    : 'hotspot',
                   os          : this.getTargetOS().toString(),
-                  arch        : 'x64',
-                  release     : 'latest',
-                  type        : getTargetType().toJdkString()]
-    def infoUrl = JdkInfoUrl + params.collect { it }.join( '&' )
+                  page        : 0,
+                  page_size   : 1,
+                  project     : 'jdk',
+                  sort_method : 'DATE',
+                  sort_order  : 'DESC',
+                  vendor      : 'openjdk']
+
+    def infoUrl = jdkInfoUrl + params.collect { it }.join( '&' )
     println "Fetching JDK binary builds info from ${infoUrl}"
 
     def headers = [accept: 'application/json', 'user-agent': 'curl/7.58.0']
@@ -204,8 +211,9 @@ def getJdkDownloadUrl()
     {
         throw new GradleException( 'Could not find JDK binary download URL: ' + json )
     }
-    def binaryLink = json['binaries'][0]['binary_link']
-    ext.jdkPackageFile = json['binaries'][0]['binary_name']
+    def binaryPackage = json['binaries'][0]['package']
+    def binaryLink = binaryPackage['link'][0]
+    ext.jdkPackageFile = binaryPackage['name'][0]
     return binaryLink
 }
 
