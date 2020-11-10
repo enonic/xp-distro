@@ -178,7 +178,7 @@ def findJdkHome( File f )
 
 def getJdkDownloadUrl()
 {
-    def jdkInfoUrl = 'https://api.adoptopenjdk.net/v3/assets/feature_releases/8/ga?'
+    def jdkInfoUrl = 'https://api.adoptopenjdk.net/v3/assets/feature_releases/11/ga?'
 
     def params = [architecture: 'x64',
                   heap_size   : 'normal',
