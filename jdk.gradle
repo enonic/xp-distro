@@ -187,10 +187,10 @@ def getJdkDownloadUrl()
                   os          : this.getTargetOS().toString(),
                   page        : 0,
                   page_size   : 1,
-                  project     : 'jdk',
+                  project     : this.getTargetType().toJdkString(),
                   sort_method : 'DATE',
                   sort_order  : 'DESC',
-                  vendor      : 'openjdk']
+                  vendor      : 'adoptopenjdk']
 
     def infoUrl = jdkInfoUrl + params.collect { it }.join( '&' )
     println "Fetching JDK binary builds info from ${infoUrl}"
