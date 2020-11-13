@@ -38,7 +38,7 @@ Omit the os parameter and specify type=sdk or type=server to build a distributio
 
 After building the project, you can start it locally by running the server script (or `bat` on Windows):
 
-    modules/distro/build/install/bin/server.sh
+    build/install/bin/server.sh
 
 ## Upload Docker Image
 
