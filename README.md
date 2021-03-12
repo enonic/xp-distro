@@ -1,6 +1,6 @@
 # Enonic XP Distro
 
-Welcome to the home of Enonic XP.  To get started, please read our docs here: http://xp.readthedocs.org.
+Welcome to the home of Enonic XP.  To get started, please read our docs here: https://developer.enonic.com/docs/xp/stable.
 
 This project bundles the runtime (https://github.com/enonic/xp) with admin applications
 (app-admin-home, app-applications, app-standardidprovider and app-users) that are necessary to use XP in a meaningful way.
