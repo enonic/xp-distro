@@ -19,12 +19,9 @@ jobs:
 
     steps:
       - name: Extract actual github.ref
-        run: echo "ACTUAL_GITHUB_REF=$GITHUB_REF$CLIENT_PAYLOAD_REF" >> $GITHUB_ENV
+        run: echo "ACTUAL_GITHUB_REF=$CLIENT_PAYLOAD_REF$GITHUB_REF$CLIENT_PAYLOAD_REF" >> $GITHUB_ENV
         env:
           CLIENT_PAYLOAD_REF: ${{ github.event.client_payload.ref }}
-
-
-      - run: echo "Deploying to production server on branch $GITHUB_REF  - $CLIENT_PAYLOAD_REF - $ACTUAL_GITHUB_REF"
 
       - uses: actions/checkout@v2
         with:
@@ -49,7 +46,7 @@ jobs:
 
     needs: publish_vars
 
-    #if: needs.publish_vars.outputs.publish == 'true'
+    if: needs.publish_vars.outputs.publish == 'true'
 
     steps:
       - uses: actions/checkout@v2
@@ -71,5 +68,4 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Publish
-        if: needs.publish_vars.outputs.publish == 'true'
         run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
