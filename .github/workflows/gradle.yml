@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Extract actual github.ref
-        run: echo "ACTUAL_GITHUB_REF=$CLIENT_PAYLOAD_REF$GITHUB_REF$CLIENT_PAYLOAD_REF" >> $GITHUB_ENV
+        run: echo "ACTUAL_GITHUB_REF=${CLIENT_PAYLOAD_REF:-$GITHUB_REF}" >> $GITHUB_ENV
         env:
           CLIENT_PAYLOAD_REF: ${{ github.event.client_payload.ref }}
 
