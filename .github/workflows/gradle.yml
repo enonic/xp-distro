@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      publish: ${{ needs.publish_vars.outputs.release != 'true' && (env.ACTUAL_GITHUB_REF == 'refs/heads/master' || startsWith(env.ACTUAL_GITHUB_REF, 'refs/heads/7.')) }}
+      publish: ${{ steps.publish_vars.outputs.release != 'true' && (env.ACTUAL_GITHUB_REF == 'refs/heads/master' || startsWith(env.ACTUAL_GITHUB_REF, 'refs/heads/7.')) }}
       repo: ${{ steps.publish_vars.outputs.repo }}
       ref: ${{ env.ACTUAL_GITHUB_REF }}
 
