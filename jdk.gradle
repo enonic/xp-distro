@@ -162,6 +162,11 @@ def isGenericBuild()
     return getTargetType() == TargetType.GENERIC
 }
 
+def isSdkBuild()
+{
+    return getTargetType() == TargetType.SDK
+}
+
 def findJdkHome( File f )
 {
     def binDir = null
@@ -230,6 +235,7 @@ ext {
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkDownloadUrl = this.&getJdkDownloadUrl
     isGenericBuild = this.&isGenericBuild
+    isSdkBuild = this.&isSdkBuild
     targetArtifactId = this.&targetArtifactId
     findJdkHome = this.&findJdkHome
 }

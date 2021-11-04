@@ -26,17 +26,22 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
-def vXpRuntime=version
-def vUsersApp=version
-def vApplicationsApp=version
-def vStdIdProvider=version
-def vMainApp=version
+def vXpRuntime = version
+def vUsersApp = version
+def vApplicationsApp = version
+def vStdIdProvider = version
+def vMainApp = version
+def vWelcomeApp = version
 
 dependencies {
     app "${group}:app-main:${vMainApp}@jar"
     app "${group}:app-standardidprovider:${vStdIdProvider}@jar"
     app "${group}:app-applications:${vApplicationsApp}@jar"
     app "${group}:app-users:${vUsersApp}@jar"
+    if ( isSdkBuild() )
+    {
+        app "${group}:app-xp-welcome:${vWelcomeApp}@jar"
+    }
     distro( "${group}:runtime:${vXpRuntime}@zip" )
 }
 
@@ -47,8 +52,9 @@ ext {
     downloadJdkDir = "$buildDir/jdk"
 }
 
-def isLinux() {
-    return hasProperty( 'os' ) ? (os == 'linux') : false
+def isLinux()
+{
+    return hasProperty( 'os' ) ? ( os == 'linux' ) : false
 }
 
 task downloadJdk( type: Download ) {
@@ -175,7 +181,8 @@ task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
 
 build.dependsOn distZip
 
-if ( isLinux() ) {
+if ( isLinux() )
+{
     build.dependsOn distTar
 }
 
@@ -183,7 +190,8 @@ publishing {
     publications {
         mavenJava( MavenPublication ) {
             artifactId targetArtifactId()
-            if ( isLinux() ) {
+            if ( isLinux() )
+            {
                 artifact distTar
             }
             artifact distZip
