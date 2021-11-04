@@ -3,7 +3,7 @@ name: Gradle Build
 on:
   push:
   repository_dispatch:
-    types: [app-main, app-users, app-applications, app-standardidprovider]
+    types: [app-main, app-users, app-applications, app-standardidprovider, app-xp-welcome]
 
 concurrency: build-${{ github.event.client_payload.ref || github.ref }}
 
