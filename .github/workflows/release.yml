@@ -74,7 +74,7 @@ jobs:
   release_notes:
     strategy:
       matrix:
-        repository: [app-admin-home, app-applications, app-users, app-standardidprovider, xp]
+        repository: [app-admin-home, app-applications, app-users, app-standardidprovider, app-xp-welcome, xp]
 
     runs-on: ubuntu-latest
 
