@@ -112,26 +112,3 @@ jobs:
         with:
           name: changelog
           path: changelog_${{ matrix.repository }}.md
-
-  release_notes_combined:
-    runs-on: ubuntu-latest
-
-    needs: release_notes
-
-    steps:
-
-      - name: Download changelog
-        uses: actions/download-artifact@v2
-        with:
-          name: changelog
-
-      - name: Combine Release Notes
-        uses: enonic/release-tools/changelog-combiner@master
-        env:
-          INUPT_FILES: "changelog_*.md"
-          OUTPUT_FILE: changelog.md
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: changelog
-          path: changelog.md
