@@ -10,6 +10,7 @@ concurrency: release
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         type: [sdk, server]
         os: [macos, linux, windows]
