@@ -56,7 +56,7 @@ jobs:
 
       - name: Download changelog
         if: matrix.type == 'generic'
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: changelog
 
@@ -122,7 +122,7 @@ jobs:
     steps:
 
       - name: Download changelog
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: changelog
 
