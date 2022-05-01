@@ -109,7 +109,7 @@ jobs:
         run: |
           printf '%b\n' "${{ fromJson(steps.get_release.outputs.data).body }}" >> changelog_${{ matrix.repository }}.md
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: changelog
           path: changelog_${{ matrix.repository }}.md
@@ -132,7 +132,7 @@ jobs:
           INUPT_FILES: "changelog_*.md"
           OUTPUT_FILE: changelog.md
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: changelog
           path: changelog.md
