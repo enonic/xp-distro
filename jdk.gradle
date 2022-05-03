@@ -183,7 +183,7 @@ def findJdkHome( File f )
 
 def getJdkDownloadUrl()
 {
-    def jdkInfoUrl = 'https://api.adoptopenjdk.net/v3/assets/feature_releases/11/ga?'
+    def jdkInfoUrl = 'https://api.adoptium.net/v3/assets/feature_releases/11/ga?'
 
     def params = [architecture: 'x64',
                   heap_size   : 'normal',
@@ -195,12 +195,12 @@ def getJdkDownloadUrl()
                   project     : 'jdk',
                   sort_method : 'DATE',
                   sort_order  : 'DESC',
-                  vendor      : 'adoptopenjdk']
+                  vendor      : 'eclipse']
 
     def infoUrl = jdkInfoUrl + params.collect { it }.join( '&' )
     println "Fetching JDK binary builds info from ${infoUrl}"
 
-    def headers = [accept: 'application/json', 'user-agent': 'curl/7.58.0']
+    def headers = [accept: 'application/json']
     def jsonText = ''
     try
     {

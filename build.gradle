@@ -164,7 +164,7 @@ task copyDist( dependsOn: copyApps )
 task distTar( type: Tar, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution tar.gz'
     group = 'Dist'
-    baseName = targetArtifactId()
+    archiveBaseName = targetArtifactId()
     compression = Compression.GZIP
     from installDir
     into archiveBase
@@ -173,7 +173,7 @@ task distTar( type: Tar, dependsOn: [copyDist, jdk] ) {
 task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
     description = 'Build full distribution zip'
     group = 'Dist'
-    baseName = targetArtifactId()
+    archiveBaseName = targetArtifactId()
     from installDir
     into archiveBase
 }
