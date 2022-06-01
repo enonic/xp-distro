@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
     id 'de.undercouch.download' version '5.1.0'
+    id 'distribution'
 }
 
 group = 'com.enonic.xp'
@@ -10,7 +11,7 @@ group = 'com.enonic.xp'
 repositories {
     mavenLocal()
     maven {
-        url 'http://repo.enonic.com/dev'
+        url 'https://repo.enonic.com/dev'
     }
 }
 
@@ -21,39 +22,27 @@ configurations {
     distro
 }
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
-def vXpRuntime = version
-def vUsersApp = version
-def vApplicationsApp = version
-def vStdIdProvider = version
-def vMainApp = version
-def vWelcomeApp = version
-
 dependencies {
-    app "${group}:app-main:${vMainApp}@jar"
-    app "${group}:app-standardidprovider:${vStdIdProvider}@jar"
-    app "${group}:app-applications:${vApplicationsApp}@jar"
-    app "${group}:app-users:${vUsersApp}@jar"
+    app "com.enonic.xp:app-main:${version}@jar"
+    app "com.enonic.xp:app-standardidprovider:${version}@jar"
+    app "com.enonic.xp:app-applications:${version}@jar"
+    app "com.enonic.xp:app-users:${version}@jar"
     if ( isSdkBuild() )
     {
-        app "${group}:app-xp-welcome:${vWelcomeApp}@jar"
+        app "com.enonic.xp:app-xp-welcome:${version}@jar"
     }
-    distro( "${group}:runtime:${vXpRuntime}@zip" )
+    distro( "com.enonic.xp:runtime:${version}@zip" )
 }
 
 ext {
     installDir = "$buildDir/install"
-    archiveBase = targetArtifactId() + "-$version"
+    targetBaseName = getTargetBaseName()
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
-}
-
-def isLinux()
-{
-    return hasProperty( 'os' ) ? ( os == 'linux' ) : false
+    jdkPackageFile = getJdkPackageFile()
+    jdkPackageName = getJdkPackageName()
+    unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
+    jlinkDir = "$buildDir/jlink/$jdkPackageName/${getTargetTypeName()}"
 }
 
 task downloadJdk( type: Download ) {
@@ -61,39 +50,18 @@ task downloadJdk( type: Download ) {
     group = 'Dist'
 
     onlyIf {
-        !isGenericBuild()
+        withJava()
     }
 
     overwrite false
     onlyIfModified true
 
-    if ( !isGenericBuild() )
+    if ( withJava() )
     {
         src getJdkDownloadUrl()
-        dest new File( downloadJdkDir, getJdkPackageFile() )
-    }
-
-    doFirst {
-        mkdir downloadJdkDir
-    }
-
-    doLast {
-        tasks.unpackJdk.configure {
-            def jdkPackageFile = getJdkPackageFile()
-            if ( jdkPackageFile.endsWith( '.zip' ) )
-            {
-                def zipFile = file( "$downloadJdkDir/$jdkPackageFile" )
-                from zipTree( zipFile )
-            }
-            else if ( jdkPackageFile.endsWith( '.tar.gz' ) )
-            {
-                def tarFile = resources.gzip( file( "$downloadJdkDir/$jdkPackageFile" ) )
-                from tarTree( tarFile )
-            }
-            else
-            {
-                throw new GradleException( "Unable to unpack JDK: $jdkPackageFile" )
-            }
+        dest file( "$downloadJdkDir/$jdkPackageFile" )
+        doFirst {
+            mkdir downloadJdkDir
         }
     }
 }
@@ -103,97 +71,137 @@ task unpackJdk( type: Copy, dependsOn: downloadJdk ) {
     group = 'Dist'
 
     onlyIf {
-        !isGenericBuild()
+        withJava()
     }
 
-    doFirst {
-        delete file( "$installDir/jdk/" ).listFiles()
-    }
-
-    def outputDir = file( "$installDir/jdk/" )
-    into outputDir
-}
-
-task jdk( dependsOn: unpackJdk ) {
-    description = 'Add JDK to distribution.'
-    group = 'Dist'
-
-    onlyIf {
-        !isGenericBuild()
-    }
-
-    doLast {
-        def targetDir = "$installDir/jdk/"
-        def jdkDirTempFiles = file( targetDir ).listFiles()
-        def jdkHome = findJdkHome( file( targetDir ) )
-
-        jdkHome.traverse( [maxDepth: 0] ) {
-            ant.move file: it, todir: targetDir
-        }
-
-        jdkDirTempFiles.each { File file -> delete( file )
-        }
-    }
-}
-
-task unpackDistro( type: Copy ) {
-    from {
-        configurations.distro.collect { zipTree( it ) }
-    }
-    into installDir
-}
-
-task copyResources( type: Copy, dependsOn: unpackDistro ) {
-    destinationDir = file( installDir )
-    from( 'src' )
-
-    if ( isGenericBuild() )
+    if ( withJava() )
     {
-        exclude 'bin/setenv.bat'
-        exclude 'bin/setenv.sh'
+        def fileTree
+        if ( jdkPackageFile.endsWith( '.zip' ) )
+        {
+            fileTree = zipTree( file( "$downloadJdkDir/$jdkPackageFile" ) )
+        }
+        else if ( jdkPackageFile.endsWith( '.tar.gz' ) )
+        {
+            fileTree = tarTree( resources.gzip( file( "$downloadJdkDir/$jdkPackageFile" ) ) )
+        }
+        else
+        {
+            throw new GradleException( "Unable to unpack JDK: $jdkPackageFile" )
+        }
+
+        from( fileTree ) {
+            eachFile { fcd -> fcd.relativePath = new RelativePath( true, fcd.relativePath.segments.drop( 1 ) )
+            }
+            includeEmptyDirs = false
+            duplicatesStrategy = DuplicatesStrategy.WARN
+        }
+
+        into unpackedJdkDir
     }
 }
 
-task copyApps( type: Copy, dependsOn: copyResources ) {
-    from( configurations.app )
-    into "$installDir/system/$appLevel"
+task jlink( type: Exec, dependsOn: unpackJdk ) {
+    onlyIf {
+        withJava()
+    }
+    doFirst {
+        def jmodsDir
+        file( unpackedJdkDir ).traverse( type: groovy.io.FileType.DIRECTORIES ) {
+            if ( it.name == "jmods" )
+            {
+                jmodsDir = it
+            }
+        }
+        if ( jmodsDir == null )
+        {
+            throw new GradleException( "Unable to find jmods in JDK: $jdkPackageFile" )
+        }
+        delete jlinkDir
+
+        def args = ['jlink', '--compress=2', '--no-header-files', '--no-man-pages',
+                    '--add-modules', 'ALL-MODULE-PATH',
+                    '--module-path', "$jmodsDir",
+                    '--output', "$jlinkDir"]
+
+        if ( withAddOptions() )
+        {
+            args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
+        }
+
+        commandLine args
+    }
+
+    inputs.dir unpackedJdkDir
+    outputs.dir jlinkDir
 }
 
-task copyDist( dependsOn: copyApps )
-
-task distTar( type: Tar, dependsOn: [copyDist, jdk] ) {
-    description = 'Build full distribution tar.gz'
-    group = 'Dist'
-    archiveBaseName = targetArtifactId()
+distTar {
     compression = Compression.GZIP
-    from installDir
-    into archiveBase
+    archiveExtension = "tgz"
 }
 
-task distZip( type: Zip, dependsOn: [copyDist, jdk] ) {
-    description = 'Build full distribution zip'
-    group = 'Dist'
-    archiveBaseName = targetArtifactId()
-    from installDir
-    into archiveBase
+distributions {
+    main {
+        distributionBaseName = project.ext.targetBaseName
+        contents {
+
+            into( '' ) {
+                from {
+                    configurations.distro.collect { zipTree( it ) }
+                }
+            }
+            into( "system/$appLevel" ) {
+                from configurations.app
+            }
+            into( '' ) {
+                from( 'src/common' )
+
+                if ( !withJava() )
+                {
+                    exclude 'bin/setenv.bat'
+                    exclude 'bin/setenv.sh'
+                }
+            }
+            if ( withJava() )
+            {
+                into( "jdk" ) {
+                    from( jlinkDir ) {
+                        filesMatching( 'bin/*' ) { mode = 0755 }
+                    }
+                }
+
+                into( "jdk/languages/js" ) {
+                    from "$unpackedJdkDir/languages/js/graaljs.jar"
+                }
+
+                into( "jdk/languages/regex" ) {
+                    from "$unpackedJdkDir/languages/regex/tregex.jar"
+                }
+            }
+            else
+            {
+                into( '' ) {
+                    from( 'src/generic' )
+                }
+            }
+        }
+    }
 }
 
-build.dependsOn distZip
-
-if ( isLinux() )
-{
-    build.dependsOn distTar
-}
+[distZip, distTar]*.dependsOn jlink
 
 publishing {
     publications {
         mavenJava( MavenPublication ) {
-            artifactId targetArtifactId()
-            if ( isLinux() )
+            if ( withDistTar() )
             {
                 artifact distTar
             }
-            artifact distZip
+            if ( withDistZip() )
+            {
+                artifact distZip
+            }
         }
     }
 }
