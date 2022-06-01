@@ -1,241 +1,158 @@
-import groovy.json.JsonSlurper
-
-import java.nio.file.FileVisitResult
-
-import static groovy.io.FileType.DIRECTORIES
-
 enum TargetOS {
-    WINDOWS( 'windows' ),
-    LINUX( 'linux' ),
-    MAC( 'mac' )
 
-    String platform
+    WINDOWS_AMD64( 'windows-amd64', 'zip' ),
+    LINUX_AMD64( 'linux-amd64', 'tar.gz' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz' ),
+    MAC_AMD64( 'darwin-amd64', 'tar.gz' ),
+    MAC_ARM64( 'darwin-aarch64', 'tar.gz' ),
+    GENERIC( null, null )
 
-    TargetOS( String value )
+    String downloadPlatform
+
+    String downloadExt
+
+    TargetOS( String downloadPlatform, String downloadExt )
     {
-        this.platform = value
+        this.downloadPlatform = downloadPlatform
+        this.downloadExt = downloadExt
     }
 
-    String toString()
+    String toJdkPackageName( String graalvmVersion )
     {
-        return this.platform
+        return "graalvm-ce-java11-${downloadPlatform}-${graalvmVersion}"
     }
 
-    static TargetOS from( String value )
+    String toJdkPackageFile( String graalvmVersion )
     {
-        value = value == null ? '' : value.toLowerCase()
-
-        if ( value.startsWith( 'windows' ) )
-        {
-            return WINDOWS
-        }
-        else if ( value.startsWith( 'linux' ) )
-        {
-            return LINUX
-        }
-        else if ( value.startsWith( 'mac' ) )
-        {
-            return MAC
-        }
-        else
-        {
-            return null
-        }
-    }
-}
-
-enum TargetType {
-    SDK( 'sdk' ),
-    SERVER( 'server' ),
-    GENERIC( 'generic' )
-
-    String type
-
-    TargetType( String value )
-    {
-        this.type = value
+        def jdkPackageName = toJdkPackageName( graalvmVersion )
+        return "${jdkPackageName}.${downloadExt}"
     }
 
-    String toString()
+    String toDownloadString( String graalvmVersion )
     {
-        return this.type
+        def jdkPackageFile = toJdkPackageFile( graalvmVersion )
+
+        return "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${graalvmVersion}/${jdkPackageFile}"
     }
 
-    String toJdkString()
+    static from( String targetPlatform )
     {
-        if ( this == SDK )
+        if ( targetPlatform == 'windows' )
         {
-            return "jdk"
+            return WINDOWS_AMD64
         }
-        else if ( this == SERVER )
+        else if ( targetPlatform == 'linux' )
         {
-            return "jre"
+            return LINUX_AMD64
         }
-        else
+        else if ( targetPlatform == 'linux-arm64' )
         {
-            return "generic"
+            return LINUX_ARM64
         }
-    }
-
-    static TargetType from( String value )
-    {
-        value = value == null ? '' : value.trim().toLowerCase()
-        if ( value == 'sdk' )
+        else if ( targetPlatform == 'mac' )
         {
-            return SDK
+            return MAC_AMD64
         }
-        else if ( value == 'server' )
+        else if ( targetPlatform == 'mac-arm64' )
         {
-            return SERVER
+            return MAC_ARM64
         }
-        else if ( value == 'generic' )
+        else if ( targetPlatform == 'generic' )
         {
             return GENERIC
         }
         else
         {
-            return null
+            throw new GradleException( 'Build target platform not supported: ' + targetPlatform )
         }
     }
 }
 
-// Pass command line parameter to specify target OS and build type. E.g.: gradlew build -Pos=mac -Ptype=jre
 def getTargetOS()
 {
     if ( ext.targetOS != null )
     {
         return ext.targetOS
     }
-
-    def paramTargetOS = project.findProperty( 'os' )
-    if ( paramTargetOS == 'current' || !project.hasProperty( 'os' ) )
-    {
-        ext.targetOS = TargetOS.from( System.getProperty( 'os.name' ) )
-        println "Build target platform: ${ext.targetOS}"
-    }
-    else
-    {
-        ext.targetOS = TargetOS.from( paramTargetOS as String )
-        if ( ext.targetOS == null )
-        {
-            throw new GradleException( 'Build target OS not supported: ' + paramTargetOS )
-        }
-        println "Build target OS: ${ext.targetOS}"
-    }
-
+    ext.targetOS = TargetOS.from( getTargetOsName() )
     return ext.targetOS
-}
-
-def getTargetType()
-{
-    if ( ext.targetType != null )
-    {
-        return ext.targetType
-    }
-
-    def paramTargetType = project.findProperty( 'type' )
-    if ( project.hasProperty( 'type' ) )
-    {
-        ext.targetType = TargetType.from( paramTargetType as String )
-        if ( ext.targetType == null )
-        {
-            throw new GradleException( 'Build target type not supported: ' + paramTargetType )
-        }
-    }
-    else
-    {
-        ext.targetType = TargetType.GENERIC
-    }
-
-    println "Build target type: ${ext.targetType}"
-
-    return ext.targetType
 }
 
 def getJdkPackageFile()
 {
-    return ext.jdkPackageFile
+    return isGenericBuild() ? null : getTargetOS().toJdkPackageFile( project.ext.graalvmVersion )
 }
 
-def isGenericBuild()
+def getJdkPackageName()
 {
-    return getTargetType() == TargetType.GENERIC
-}
-
-def isSdkBuild()
-{
-    return getTargetType() == TargetType.SDK
-}
-
-def findJdkHome( File f )
-{
-    def binDir = null
-    f.traverse( type: DIRECTORIES, nameFilter: ~/bin/ ) {
-        binDir = it
-        return FileVisitResult.TERMINATE
-    }
-    if ( binDir == null )
-    {
-        throw new GradleException( 'Could not find JDK home directory in ' + f.absolutePath )
-    }
-    return binDir.getParentFile()
+    return isGenericBuild() ? null : getTargetOS().toJdkPackageName( project.ext.graalvmVersion )
 }
 
 def getJdkDownloadUrl()
 {
-    def jdkInfoUrl = 'https://api.adoptium.net/v3/assets/feature_releases/11/ga?'
-
-    def params = [architecture: 'x64',
-                  heap_size   : 'normal',
-                  image_type  : this.getTargetType().toJdkString(),
-                  jvm_impl    : 'hotspot',
-                  os          : this.getTargetOS().toString(),
-                  page        : 0,
-                  page_size   : 1,
-                  project     : 'jdk',
-                  sort_method : 'DATE',
-                  sort_order  : 'DESC',
-                  vendor      : 'eclipse']
-
-    def infoUrl = jdkInfoUrl + params.collect { it }.join( '&' )
-    println "Fetching JDK binary builds info from ${infoUrl}"
-
-    def headers = [accept: 'application/json']
-    def jsonText = ''
-    try
-    {
-        jsonText = new URL( infoUrl ).getText( requestProperties: headers )
-    }
-    catch ( e )
-    {
-        throw new GradleException( 'Could not find JDK binary download URL: ' + infoUrl, e )
-    }
-    def json = new JsonSlurper().parseText( jsonText ) as Map
-
-    if ( !( json['binaries'] && json['binaries'][0] ) )
-    {
-        throw new GradleException( 'Could not find JDK binary download URL: ' + json )
-    }
-    def binaryPackage = json['binaries'][0]['package']
-    def binaryLink = binaryPackage['link'][0]
-    ext.jdkPackageFile = binaryPackage['name'][0]
-    return binaryLink
+    return isGenericBuild() ? null : getTargetOS().toDownloadString( project.ext.graalvmVersion )
 }
 
-def targetArtifactId()
+def isGenericBuild()
 {
-    return isGenericBuild() ? 'enonic-xp-generic' : ( 'enonic-xp-' + getTargetOS() + '-' + getTargetType() )
+    return getTargetOS() == TargetOS.GENERIC
+}
+
+def isSdkBuild()
+{
+    return getTargetTypeName() == 'sdk'
+}
+
+def withDistTar()
+{
+    return ['linux', 'linux-arm64', 'mac', 'mac-arm64', 'generic'].contains( getTargetOsName() )
+}
+
+def withDistZip()
+{
+    // plan is to leave only 'windows' from XP 7.11
+    return ['windows', 'linux', 'mac', 'generic'].contains( getTargetOsName() )
+}
+
+def withJava()
+{
+    return !isGenericBuild()
+}
+
+def withAddOptions()
+{
+    return getTargetOsName() != 'windows'
+}
+
+def getTargetOsName()
+{
+    return project.findProperty( 'os' ) ?: 'generic'
+}
+
+def getTargetTypeName()
+{
+    return project.findProperty( 'type' ) ?: 'server'
+}
+
+def getTargetBaseName()
+{
+    return 'enonic-xp-' + getTargetOsName() + ( isGenericBuild() ? '' : '-' + getTargetTypeName() )
 }
 
 ext {
     targetOS = null
     targetType = null
-    jdkPackageFile = ''
-    getTargetOS = this.&getTargetOS
+    jdkPackageFile = null
+    graalvmVersion = "22.1.0"
     getJdkPackageFile = this.&getJdkPackageFile
+    getJdkPackageName = this.&getJdkPackageName
     getJdkDownloadUrl = this.&getJdkDownloadUrl
     isGenericBuild = this.&isGenericBuild
     isSdkBuild = this.&isSdkBuild
-    targetArtifactId = this.&targetArtifactId
-    findJdkHome = this.&findJdkHome
+    getTargetBaseName = this.&getTargetBaseName
+    getTargetTypeName = this.&getTargetTypeName
+    withDistTar = this.&withDistTar
+    withDistZip = this.&withDistZip
+    withJava = this.&withJava
+    withAddOptions = this.&withAddOptions
 }

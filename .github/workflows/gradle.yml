@@ -36,10 +36,10 @@ jobs:
     strategy:
       matrix:
         type: [sdk, server]
-        os: [macos, linux, windows]
+        os: [mac, linux, windows]
         include:
-          - type: generic
-            os: linux
+          - type: server
+            os: generic
 
     runs-on: ubuntu-latest
 
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
 
       - uses: actions/cache@v3
         with:
