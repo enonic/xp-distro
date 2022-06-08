@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         type: [sdk, server]
-        os: [mac, linux, windows]
+        os: [mac, mac-arm64, linux, linux-arm64, windows]
         include:
           - type: server
             os: generic
