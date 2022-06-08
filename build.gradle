@@ -194,6 +194,7 @@ distributions {
 publishing {
     publications {
         mavenJava( MavenPublication ) {
+            artifactId project.ext.targetBaseName
             if ( withDistTar() )
             {
                 artifact distTar
