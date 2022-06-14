@@ -1,20 +1,23 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-amd64', 'zip' ),
-    LINUX_AMD64( 'linux-amd64', 'tar.gz' ),
-    LINUX_ARM64( 'linux-aarch64', 'tar.gz' ),
-    MAC_AMD64( 'darwin-amd64', 'tar.gz' ),
-    MAC_ARM64( 'darwin-aarch64', 'tar.gz' ),
-    GENERIC( null, null )
+    WINDOWS_AMD64( 'windows-amd64', 'zip', '' ),
+    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '' ),
+    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home' ),
+    MAC_ARM64( 'darwin-aarch64', 'tar.gz', 'Contents/Home' ),
+    GENERIC( null, null, null )
 
     String downloadPlatform
 
     String downloadExt
 
-    TargetOS( String downloadPlatform, String downloadExt )
+    String archiveJavaHome
+
+    TargetOS( String downloadPlatform, String downloadExt, String archiveJavaHome )
     {
         this.downloadPlatform = downloadPlatform
         this.downloadExt = downloadExt
+        this.archiveJavaHome = archiveJavaHome
     }
 
     String toJdkPackageName( String graalvmVersion )
@@ -98,6 +101,11 @@ def isGenericBuild()
     return getTargetOS() == TargetOS.GENERIC
 }
 
+def getArchiveJavaHome()
+{
+    return getTargetOS().archiveJavaHome
+}
+
 def isSdkBuild()
 {
     return getTargetTypeName() == 'sdk'
@@ -147,6 +155,7 @@ ext {
     getJdkPackageFile = this.&getJdkPackageFile
     getJdkPackageName = this.&getJdkPackageName
     getJdkDownloadUrl = this.&getJdkDownloadUrl
+    getArchiveJavaHome = this.&getArchiveJavaHome
     isGenericBuild = this.&isGenericBuild
     isSdkBuild = this.&isSdkBuild
     getTargetBaseName = this.&getTargetBaseName
