@@ -42,6 +42,7 @@ ext {
     jdkPackageFile = getJdkPackageFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
+    archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
     jlinkDir = "$buildDir/jlink/$jdkPackageName/${getTargetTypeName()}"
 }
 
@@ -106,17 +107,8 @@ task jlink( type: Exec, dependsOn: unpackJdk ) {
         withJava()
     }
     doFirst {
-        def jmodsDir
-        file( unpackedJdkDir ).traverse( type: groovy.io.FileType.DIRECTORIES ) {
-            if ( it.name == "jmods" )
-            {
-                jmodsDir = it
-            }
-        }
-        if ( jmodsDir == null )
-        {
-            throw new GradleException( "Unable to find jmods in JDK: $jdkPackageFile" )
-        }
+        def jmodsDir = "$archiveJavaHomeDir/jmods"
+
         delete jlinkDir
 
         def args = ['jlink', '--compress=2', '--no-header-files', '--no-man-pages',
@@ -172,11 +164,11 @@ distributions {
                 }
 
                 into( "jdk/languages/js" ) {
-                    from "$unpackedJdkDir/languages/js/graaljs.jar"
+                    from "$archiveJavaHomeDir/languages/js/graaljs.jar"
                 }
 
                 into( "jdk/languages/regex" ) {
-                    from "$unpackedJdkDir/languages/regex/tregex.jar"
+                    from "$archiveJavaHomeDir/languages/regex/tregex.jar"
                 }
             }
             else
