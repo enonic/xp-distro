@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'base'
     id 'maven-publish'
@@ -147,7 +149,18 @@ distributions {
                 from configurations.app
             }
             into( '' ) {
-                from( 'src/common' )
+                from( 'src/common' ) {
+                    filesMatching( '**/*.sh' ) {
+                        mode = 0755
+                        filter( ReplaceTokens, tokens: [version: version] )
+                    }
+                    filesMatching( 'service/init.d/xp' ) {
+                        mode = 0755
+                    }
+                    filesMatching( 'README.txt' ) {
+                        expand version: version
+                    }
+                }
 
                 if ( !withJava() )
                 {
@@ -155,6 +168,7 @@ distributions {
                     exclude 'bin/setenv.sh'
                 }
             }
+
             if ( withJava() )
             {
                 into( "jdk" ) {
@@ -174,7 +188,11 @@ distributions {
             else
             {
                 into( '' ) {
-                    from( 'src/generic' )
+                    from( 'src/generic' ) {
+                        filesMatching( '**/*.sh' ) {
+                            mode = 0755
+                        }
+                    }
                 }
             }
         }
