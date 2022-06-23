@@ -9,9 +9,15 @@ This project bundles the runtime (https://github.com/enonic/xp) with admin appli
 
 Set the desired version in `gradle.properties`, and run:
 
-    gradle build
+    gradlew build
+    
+Or, to assamble distribution content and installs it on the current machine:
+
+    gradlew installDist
+
 
 By default, it will build a `generic` `server` build without including the JDK.
+
 
 ### Platform specific builds
 
