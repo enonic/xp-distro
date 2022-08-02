@@ -41,7 +41,9 @@ ext {
     targetBaseName = getTargetBaseName()
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
+    downloadGraalJsDir = "$buildDir/graaljs"
     jdkPackageFile = getJdkPackageFile()
+    graalJsFile = getGraalJsFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
     archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
@@ -65,6 +67,27 @@ task downloadJdk( type: Download ) {
         dest file( "$downloadJdkDir/$jdkPackageFile" )
         doFirst {
             mkdir downloadJdkDir
+        }
+    }
+}
+
+task downloadGraalJs( type: Download ) {
+    description = 'Download Graal.JS.'
+    group = 'Dist'
+
+    onlyIf {
+        withJava()
+    }
+
+    overwrite false
+    onlyIfModified true
+
+    if ( withJava() )
+    {
+        src getGraalJsDownloadUrl()
+        dest file( "$downloadGraalJsDir/$graalJsFile" )
+        doFirst {
+            mkdir downloadGraalJsDir
         }
     }
 }
@@ -180,13 +203,16 @@ distributions {
                         filesMatching( 'bin/*' ) { mode = 0755 }
                     }
                 }
-
-                into( "jdk/languages/js" ) {
-                    from "$archiveJavaHomeDir/languages/js/graaljs.jar"
+                into( "jdk" ) {
+                    from( archiveJavaHomeDir ) {
+                        include( "languages/icu4j/**" )
+                        include( "languages/regex/**" )
+                    }
                 }
-
-                into( "jdk/languages/regex" ) {
-                    from "$archiveJavaHomeDir/languages/regex/tregex.jar"
+                into( "jdk" ) {
+                    from( zipTree( file( "$downloadGraalJsDir/$graalJsFile" ) ) ) {
+                        include( "languages/js/*" )
+                    }
                 }
             }
             else
@@ -203,7 +229,7 @@ distributions {
     }
 }
 
-[distZip, distTar]*.dependsOn jlink
+[distZip, distTar]*.dependsOn jlink, downloadGraalJs
 
 publishing {
     publications {
