@@ -31,11 +31,23 @@ enum TargetOS {
         return "${jdkPackageName}.${downloadExt}"
     }
 
+    String toGraalJsFile( String graalvmVersion )
+    {
+        return "js-installable-svm-java11-${downloadPlatform}-${graalvmVersion}.jar"
+    }
+
     String toDownloadString( String graalvmVersion )
     {
         def jdkPackageFile = toJdkPackageFile( graalvmVersion )
 
         return "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${graalvmVersion}/${jdkPackageFile}"
+    }
+
+    String toGraalJsDownloadString( String graalvmVersion )
+    {
+        def graalJsFile = toGraalJsFile( graalvmVersion )
+
+        return "https://github.com/oracle/graaljs/releases/download/vm-${graalvmVersion}/${graalJsFile}"
     }
 
     static from( String targetPlatform )
@@ -86,6 +98,11 @@ def getJdkPackageFile()
     return isGenericBuild() ? null : getTargetOS().toJdkPackageFile( project.ext.graalvmVersion )
 }
 
+def getGraalJsFile()
+{
+    return isGenericBuild() ? null : getTargetOS().toGraalJsFile( project.ext.graalvmVersion )
+}
+
 def getJdkPackageName()
 {
     return isGenericBuild() ? null : getTargetOS().toJdkPackageName( project.ext.graalvmVersion )
@@ -94,6 +111,11 @@ def getJdkPackageName()
 def getJdkDownloadUrl()
 {
     return isGenericBuild() ? null : getTargetOS().toDownloadString( project.ext.graalvmVersion )
+}
+
+def getGraalJsDownloadUrl()
+{
+    return isGenericBuild() ? null : getTargetOS().toGraalJsDownloadString( project.ext.graalvmVersion )
 }
 
 def isGenericBuild()
@@ -151,10 +173,12 @@ ext {
     targetOS = null
     targetType = null
     jdkPackageFile = null
-    graalvmVersion = "22.1.0"
+    graalvmVersion = "22.3.1"
     getJdkPackageFile = this.&getJdkPackageFile
+    getGraalJsFile = this.&getGraalJsFile
     getJdkPackageName = this.&getJdkPackageName
     getJdkDownloadUrl = this.&getJdkDownloadUrl
+    getGraalJsDownloadUrl = this.&getGraalJsDownloadUrl
     getArchiveJavaHome = this.&getArchiveJavaHome
     isGenericBuild = this.&isGenericBuild
     isSdkBuild = this.&isSdkBuild
