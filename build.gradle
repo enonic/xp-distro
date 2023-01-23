@@ -144,6 +144,10 @@ distributions {
                 from {
                     configurations.distro.collect { zipTree( it ) }
                 }
+                if ( isArm64() )
+                {
+                    exclude { it.file.name.equals( 'jna-4.1.0.jar' ) }
+                }
             }
             into( "system/$appLevel" ) {
                 from configurations.app
