@@ -127,6 +127,10 @@ def withJava()
     return !isGenericBuild()
 }
 
+def isArm64() {
+    return [ 'linux-arm64', 'mac-arm64'].contains( getTargetOsName() )
+}
+
 def withAddOptions()
 {
     return getTargetOsName() != 'windows'
@@ -163,5 +167,6 @@ ext {
     withDistTar = this.&withDistTar
     withDistZip = this.&withDistZip
     withJava = this.&withJava
+    isArm64 = this.&isArm64
     withAddOptions = this.&withAddOptions
 }
