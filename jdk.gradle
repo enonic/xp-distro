@@ -177,7 +177,7 @@ ext {
     targetOS = null
     targetType = null
     jdkPackageFile = null
-    graalvmVersion = "22.3.1"
+    graalvmVersion = "22.3.2"
     getJdkPackageFile = this.&getJdkPackageFile
     getGraalJsFile = this.&getGraalJsFile
     getJdkPackageName = this.&getJdkPackageName
