@@ -1,11 +1,11 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-amd64', 'zip', '' ),
-    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' ),
-    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '' ),
-    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home' ),
-    MAC_ARM64( 'darwin-aarch64', 'tar.gz', 'Contents/Home' ),
-    GENERIC( null, null, null )
+    WINDOWS_AMD64( 'windows-amd64', 'zip', '', '22.3.2' ),
+    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' , '22.3.2' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '', '22.3.2' ),
+    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home', '22.3.2' ),
+    MAC_ARM64( 'darwin-aarch64', 'tar.gz', 'Contents/Home', '22.3.1' ),
+    GENERIC( null, null, null, null )
 
     String downloadPlatform
 
@@ -13,39 +13,42 @@ enum TargetOS {
 
     String archiveJavaHome
 
-    TargetOS( String downloadPlatform, String downloadExt, String archiveJavaHome )
+    String graalvmVersion
+
+    TargetOS( String downloadPlatform, String downloadExt, String archiveJavaHome, String graalvmVersion )
     {
         this.downloadPlatform = downloadPlatform
         this.downloadExt = downloadExt
         this.archiveJavaHome = archiveJavaHome
+        this.graalvmVersion = graalvmVersion
     }
 
-    String toJdkPackageName( String graalvmVersion )
+    String toJdkPackageName()
     {
         return "graalvm-ce-java11-${downloadPlatform}-${graalvmVersion}"
     }
 
-    String toJdkPackageFile( String graalvmVersion )
+    String toJdkPackageFile()
     {
-        def jdkPackageName = toJdkPackageName( graalvmVersion )
+        def jdkPackageName = toJdkPackageName()
         return "${jdkPackageName}.${downloadExt}"
     }
 
-    String toGraalJsFile( String graalvmVersion )
+    String toGraalJsFile()
     {
         return "js-installable-svm-java11-${downloadPlatform}-${graalvmVersion}.jar"
     }
 
-    String toDownloadString( String graalvmVersion )
+    String toDownloadString()
     {
-        def jdkPackageFile = toJdkPackageFile( graalvmVersion )
+        def jdkPackageFile = toJdkPackageFile()
 
         return "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${graalvmVersion}/${jdkPackageFile}"
     }
 
-    String toGraalJsDownloadString( String graalvmVersion )
+    String toGraalJsDownloadString()
     {
-        def graalJsFile = toGraalJsFile( graalvmVersion )
+        def graalJsFile = toGraalJsFile()
 
         return "https://github.com/oracle/graaljs/releases/download/vm-${graalvmVersion}/${graalJsFile}"
     }
@@ -95,27 +98,27 @@ def getTargetOS()
 
 def getJdkPackageFile()
 {
-    return isGenericBuild() ? null : getTargetOS().toJdkPackageFile( project.ext.graalvmVersion )
+    return isGenericBuild() ? null : getTargetOS().toJdkPackageFile()
 }
 
 def getGraalJsFile()
 {
-    return isGenericBuild() ? null : getTargetOS().toGraalJsFile( project.ext.graalvmVersion )
+    return isGenericBuild() ? null : getTargetOS().toGraalJsFile()
 }
 
 def getJdkPackageName()
 {
-    return isGenericBuild() ? null : getTargetOS().toJdkPackageName( project.ext.graalvmVersion )
+    return isGenericBuild() ? null : getTargetOS().toJdkPackageName()
 }
 
 def getJdkDownloadUrl()
 {
-    return isGenericBuild() ? null : getTargetOS().toDownloadString( project.ext.graalvmVersion )
+    return isGenericBuild() ? null : getTargetOS().toDownloadString()
 }
 
 def getGraalJsDownloadUrl()
 {
-    return isGenericBuild() ? null : getTargetOS().toGraalJsDownloadString( project.ext.graalvmVersion )
+    return isGenericBuild() ? null : getTargetOS().toGraalJsDownloadString()
 }
 
 def isGenericBuild()
@@ -177,7 +180,6 @@ ext {
     targetOS = null
     targetType = null
     jdkPackageFile = null
-    graalvmVersion = "22.3.2"
     getJdkPackageFile = this.&getJdkPackageFile
     getGraalJsFile = this.&getGraalJsFile
     getJdkPackageName = this.&getJdkPackageName
