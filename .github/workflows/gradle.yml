@@ -54,17 +54,9 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: 11.0.18
+          java-version: 17.0.7
           distribution: 'temurin'
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          cache: gradle
 
       - name: Publish
         run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
