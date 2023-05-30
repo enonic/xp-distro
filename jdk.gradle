@@ -15,6 +15,8 @@ enum TargetOS {
 
     String graalvmVersion
 
+    String javaVersion = 'java17'
+
     TargetOS( String downloadPlatform, String downloadExt, String archiveJavaHome, String graalvmVersion )
     {
         this.downloadPlatform = downloadPlatform
@@ -25,7 +27,7 @@ enum TargetOS {
 
     String toJdkPackageName()
     {
-        return "graalvm-ce-java11-${downloadPlatform}-${graalvmVersion}"
+        return "graalvm-ce-${javaVersion}-${downloadPlatform}-${graalvmVersion}"
     }
 
     String toJdkPackageFile()

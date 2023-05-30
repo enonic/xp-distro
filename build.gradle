@@ -229,7 +229,7 @@ distributions {
     }
 }
 
-[distZip, distTar]*.dependsOn jlink, downloadGraalJs
+[distZip, distTar, installDist]*.dependsOn jlink, downloadGraalJs
 
 publishing {
     publications {
