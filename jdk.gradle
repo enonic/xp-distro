@@ -38,7 +38,7 @@ enum TargetOS {
 
     String toGraalJsFile()
     {
-        return "js-installable-svm-java11-${downloadPlatform}-${graalvmVersion}.jar"
+        return "js-installable-svm-${javaVersion}-${downloadPlatform}-${graalvmVersion}.jar"
     }
 
     String toDownloadString()
