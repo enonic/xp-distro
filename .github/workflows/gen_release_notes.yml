@@ -11,8 +11,6 @@ jobs:
   release_notes_combined:
     runs-on: ubuntu-latest
 
-    needs: release_notes
-
     steps:
       - name: Combine Release Notes
         uses: enonic/release-tools/changelog-combiner@master
