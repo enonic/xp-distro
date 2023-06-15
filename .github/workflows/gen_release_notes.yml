@@ -1,0 +1,29 @@
+name: Generate Release Notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to fetch changelog from.'
+        required: true
+
+jobs:
+  release_notes_combined:
+    runs-on: ubuntu-latest
+
+    needs: release_notes
+
+    steps:
+      - name: Combine Release Notes
+        uses: enonic/release-tools/changelog-combiner@master
+        with:
+          repositories: app-admin-home app-applications app-users app-standardidprovider app-xp-welcome xp
+          output-file: changelog.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ inputs.tag }}
+
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: changelog
+          path: changelog.md

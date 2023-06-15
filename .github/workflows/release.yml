@@ -63,65 +63,20 @@ jobs:
           release_name: Enonic XP Distro ${{ steps.publish_vars.outputs.version }}
           prerelease: ${{ steps.publish_vars.outputs.prerelease == 'true' }}
 
-  release_notes:
-    strategy:
-      matrix:
-        repository: [app-admin-home, app-applications, app-users, app-standardidprovider, app-xp-welcome, xp]
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Read version property
-        id: read_version
-        uses: christian-draeger/read-properties@1.0.1
-        with:
-          path: './gradle.properties'
-          property: 'version'
-
-      - name: Get Release
-        if: "!contains(steps.read_version.outputs.value, '-SNAPSHOT')"
-        uses: octokit/request-action@v2.x
-        id: get_release
-        with:
-          route: GET /repos/:repository/releases/tags/:tag
-          repository: enonic/${{ matrix.repository }}
-          tag: v${{ steps.read_version.outputs.value }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create file
-        run: |
-          echo '' >> changelog_${{ matrix.repository }}.md
-
-      - name: Save to file
-        if: "!contains(steps.read_version.outputs.value, '-SNAPSHOT')"
-        run: |
-          printf '%b\n' "${{ fromJson(steps.get_release.outputs.data).body }}" >> changelog_${{ matrix.repository }}.md
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: changelog
-          path: changelog_${{ matrix.repository }}.md
-
   release_notes_combined:
     runs-on: ubuntu-latest
 
     needs: release_notes
 
     steps:
-
-      - name: Download changelog
-        uses: actions/download-artifact@v3
-        with:
-          name: changelog
-
       - name: Combine Release Notes
         uses: enonic/release-tools/changelog-combiner@master
-        env:
-          INUPT_FILES: "changelog_*.md"
-          OUTPUT_FILE: changelog.md
+        with:
+          repositories: app-admin-home app-applications app-users app-standardidprovider app-xp-welcome xp
+          output-file: changelog.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+
 
       - uses: actions/upload-artifact@v3
         with:
