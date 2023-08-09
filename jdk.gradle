@@ -1,9 +1,9 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-amd64', 'zip', '', '22.3.2' ),
-    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' , '22.3.2' ),
-    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '', '22.3.2' ),
-    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home', '22.3.2' ),
+    WINDOWS_AMD64( 'windows-amd64', 'zip', '', '22.3.3' ),
+    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' , '22.3.3' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '', '22.3.3' ),
+    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home', '22.3.3' ),
     MAC_ARM64( 'darwin-aarch64', 'tar.gz', 'Contents/Home', '22.3.1' ),
     GENERIC( null, null, null, null )
 
