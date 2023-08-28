@@ -4,7 +4,7 @@ plugins {
     id 'base'
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.1.2'
-    id 'de.undercouch.download' version '5.4.0'
+    id 'de.undercouch.download' version '5.5.0'
     id 'distribution'
 }
 
