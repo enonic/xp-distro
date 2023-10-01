@@ -22,7 +22,7 @@ jobs:
         env:
           ACTUAL_REF: ${{ github.event.client_payload.ref || github.ref }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.client_payload.ref || github.ref }}
 
@@ -48,7 +48,7 @@ jobs:
     if: needs.publish_vars.outputs.publish == 'true'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.client_payload.ref || github.ref }}
 
