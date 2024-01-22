@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'base'
     id 'maven-publish'
-    id 'com.enonic.defaults' version '2.1.2'
+    id 'com.enonic.defaults' version '2.1.5'
     id 'de.undercouch.download' version '5.5.0'
     id 'distribution'
 }
