@@ -42,8 +42,12 @@ ext {
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
     downloadGraalJsDir = "$buildDir/graaljs"
+    downloadIcu4jDir = "$buildDir/icu4j"
+    downloadRegexDir = "$buildDir/regex"
     jdkPackageFile = getJdkPackageFile()
     graalJsFile = getGraalJsFile()
+    icu4jFile = getIcu4jFile()
+    regexFile = getRegexFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
     archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
@@ -88,6 +92,48 @@ task downloadGraalJs( type: Download ) {
         dest file( "$downloadGraalJsDir/$graalJsFile" )
         doFirst {
             mkdir downloadGraalJsDir
+        }
+    }
+}
+
+task downloadIcu4j( type: Download ) {
+    description = 'Download ICU4J.'
+    group = 'Dist'
+
+    onlyIf {
+        withJava()
+    }
+
+    overwrite false
+    onlyIfModified true
+
+    if ( withJava() )
+    {
+        src getIcu4jDownloadUrl()
+        dest file( "$downloadIcu4jDir/$icu4jFile" )
+        doFirst {
+            mkdir downloadIcu4jDir
+        }
+    }
+}
+
+task downloadRegex( type: Download ) {
+    description = 'Download Regex.'
+    group = 'Dist'
+
+    onlyIf {
+        withJava()
+    }
+
+    overwrite false
+    onlyIfModified true
+
+    if ( withJava() )
+    {
+        src getRegexDownloadUrl()
+        dest file( "$downloadRegexDir/$regexFile" )
+        doFirst {
+            mkdir downloadRegexDir
         }
     }
 }
@@ -204,14 +250,18 @@ distributions {
                     }
                 }
                 into( "jdk" ) {
-                    from( archiveJavaHomeDir ) {
-                        include( "languages/icu4j/**" )
-                        include( "languages/regex/**" )
+                    from( zipTree( file( "$downloadGraalJsDir/$graalJsFile" ) ) ) {
+                        include( "languages/js/*" )
                     }
                 }
                 into( "jdk" ) {
-                    from( zipTree( file( "$downloadGraalJsDir/$graalJsFile" ) ) ) {
-                        include( "languages/js/*" )
+                    from( zipTree( file( "$downloadIcu4jDir/$icu4jFile" ) ) ) {
+                        include( "languages/icu4j/*" )
+                    }
+                }
+                into( "jdk" ) {
+                    from( zipTree( file( "$downloadRegexDir/$regexFile" ) ) ) {
+                        include( "languages/regex/*" )
                     }
                 }
             }
@@ -229,7 +279,7 @@ distributions {
     }
 }
 
-[distZip, distTar, installDist]*.dependsOn jlink, downloadGraalJs
+[distZip, distTar, installDist]*.dependsOn jlink, downloadGraalJs, downloadIcu4j, downloadRegex
 
 publishing {
     publications {
