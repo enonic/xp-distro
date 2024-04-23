@@ -54,9 +54,11 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          java-version: 17.0.7
-          distribution: 'temurin'
-          cache: gradle
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Publish
         run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
