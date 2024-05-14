@@ -61,4 +61,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Publish
-        run: ./gradlew publish --refresh-dependencies -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./gradlew --refresh-dependencies publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
