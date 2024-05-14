@@ -27,9 +27,11 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: 17.0.7
-          distribution: 'temurin'
-          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Get publishing variables
         id: publish_vars
@@ -43,11 +45,11 @@ jobs:
         run: exit 1
 
       - name: Publish
-        run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ steps.publish_vars.outputs.repo }} -PrepoUser=${{ secrets.ARTIFACTORY_USERNAME }} -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./gradlew publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ steps.publish_vars.outputs.repo }} -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
 
       - name: Download changelog
         if: matrix.os == 'generic'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: changelog
 
@@ -75,7 +77,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: changelog
           path: changelog.md
