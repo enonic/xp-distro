@@ -2,10 +2,9 @@ name: Gradle Build
 
 on:
   push:
-  repository_dispatch:
-    types: [app-main, app-users, app-applications, app-standardidprovider, app-xp-welcome]
+  workflow_dispatch:
 
-concurrency: build-${{ github.event.client_payload.ref || github.ref }}
+concurrency: build-${{ github.ref }}
 
 jobs:
 
@@ -20,11 +19,9 @@ jobs:
       - name: Extract actual github.ref
         run: echo "ACTUAL_GITHUB_REF=${ACTUAL_REF}" >> $GITHUB_ENV
         env:
-          ACTUAL_REF: ${{ github.event.client_payload.ref || github.ref }}
+          ACTUAL_REF: ${{ github.ref }}
 
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.ref || github.ref }}
 
       - name: Get publishing variables
         id: publish_vars
@@ -49,8 +46,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.ref || github.ref }}
 
       - uses: actions/setup-java@v4
         with:
