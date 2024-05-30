@@ -41,13 +41,7 @@ ext {
     targetBaseName = getTargetBaseName()
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
-    downloadGraalJsDir = "$buildDir/graaljs"
-    downloadIcu4jDir = "$buildDir/icu4j"
-    downloadRegexDir = "$buildDir/regex"
     jdkPackageFile = getJdkPackageFile()
-    graalJsFile = getGraalJsFile()
-    icu4jFile = getIcu4jFile()
-    regexFile = getRegexFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
     archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
@@ -71,69 +65,6 @@ task downloadJdk( type: Download ) {
         dest file( "$downloadJdkDir/$jdkPackageFile" )
         doFirst {
             mkdir downloadJdkDir
-        }
-    }
-}
-
-task downloadGraalJs( type: Download ) {
-    description = 'Download Graal.JS.'
-    group = 'Dist'
-
-    onlyIf {
-        withJava()
-    }
-
-    overwrite false
-    onlyIfModified true
-
-    if ( withJava() )
-    {
-        src getGraalJsDownloadUrl()
-        dest file( "$downloadGraalJsDir/$graalJsFile" )
-        doFirst {
-            mkdir downloadGraalJsDir
-        }
-    }
-}
-
-task downloadIcu4j( type: Download ) {
-    description = 'Download ICU4J.'
-    group = 'Dist'
-
-    onlyIf {
-        withJava()
-    }
-
-    overwrite false
-    onlyIfModified true
-
-    if ( withJava() )
-    {
-        src getIcu4jDownloadUrl()
-        dest file( "$downloadIcu4jDir/$icu4jFile" )
-        doFirst {
-            mkdir downloadIcu4jDir
-        }
-    }
-}
-
-task downloadRegex( type: Download ) {
-    description = 'Download Regex.'
-    group = 'Dist'
-
-    onlyIf {
-        withJava()
-    }
-
-    overwrite false
-    onlyIfModified true
-
-    if ( withJava() )
-    {
-        src getRegexDownloadUrl()
-        dest file( "$downloadRegexDir/$regexFile" )
-        doFirst {
-            mkdir downloadRegexDir
         }
     }
 }
@@ -187,10 +118,7 @@ task jlink( type: Exec, dependsOn: unpackJdk ) {
                     '--module-path', "$jmodsDir",
                     '--output', "$jlinkDir"]
 
-        if ( withAddOptions() )
-        {
-            args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
-        }
+        args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
 
         commandLine args
     }
@@ -249,21 +177,6 @@ distributions {
                         filesMatching( 'bin/*' ) { mode = 0755 }
                     }
                 }
-                into( "jdk" ) {
-                    from( zipTree( file( "$downloadGraalJsDir/$graalJsFile" ) ) ) {
-                        include( "languages/js/*" )
-                    }
-                }
-                into( "jdk" ) {
-                    from( zipTree( file( "$downloadIcu4jDir/$icu4jFile" ) ) ) {
-                        include( "languages/icu4j/*" )
-                    }
-                }
-                into( "jdk" ) {
-                    from( zipTree( file( "$downloadRegexDir/$regexFile" ) ) ) {
-                        include( "languages/regex/*" )
-                    }
-                }
             }
             else
             {
@@ -279,7 +192,7 @@ distributions {
     }
 }
 
-[distZip, distTar, installDist]*.dependsOn jlink, downloadGraalJs, downloadIcu4j, downloadRegex
+[distZip, distTar, installDist]*.dependsOn jlink
 
 publishing {
     publications {
