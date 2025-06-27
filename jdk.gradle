@@ -124,7 +124,7 @@ def withDistTar()
 
 def withDistZip()
 {
-    return ['windows', 'generic'].contains( getTargetOsName() )
+    return ['windows'].contains( getTargetOsName() )
 }
 
 def withJava()
