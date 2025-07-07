@@ -31,7 +31,7 @@ dependencies {
     app "com.enonic.xp:app-users:${version}@jar"
     if ( isSdkBuild() )
     {
-        app "com.enonic.xp:app-xp-welcome:${version}@jar"
+        app "com.enonic.xp:app-sdk:${version}@jar"
     }
     distro( "com.enonic.xp:runtime:${version}@zip" )
 }

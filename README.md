@@ -3,7 +3,7 @@
 Welcome to the home of Enonic XP.  To get started, please read our docs here: https://developer.enonic.com/docs/xp/stable.
 
 This project bundles the runtime (https://github.com/enonic/xp) with admin applications
-(app-xp-wellcome (in sdk only), app-admin-home, app-applications, app-standardidprovider and app-users) that are necessary to use XP in a meaningful way.
+(app-xp-welcome (in sdk only), app-admin-home, app-applications, app-standardidprovider and app-users) that are necessary to use XP in a meaningful way.
 
 ## Building
 
