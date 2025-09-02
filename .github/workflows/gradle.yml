@@ -21,7 +21,7 @@ jobs:
         env:
           ACTUAL_REF: ${{ github.ref }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get publishing variables
         id: publish_vars
@@ -45,7 +45,7 @@ jobs:
     if: needs.publish_vars.outputs.publish == 'true'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
