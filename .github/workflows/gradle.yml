@@ -53,7 +53,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Publish
         run: ./gradlew --refresh-dependencies publish -Pos=${{ matrix.os }} -Ptype=${{ matrix.type }} -PrepoKey=${{ needs.publish_vars.outputs.repo }} -PrepoUser=ci -PrepoPassword=${{ secrets.ARTIFACTORY_PASSWORD }}
