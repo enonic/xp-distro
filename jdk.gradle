@@ -1,10 +1,10 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-amd64', 'zip', '', '22.3.3' ),
-    LINUX_AMD64( 'linux-amd64', 'tar.gz', '' , '22.3.3' ),
-    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '', '22.3.3' ),
-    MAC_AMD64( 'darwin-amd64', 'tar.gz', 'Contents/Home', '22.3.3' ),
-    MAC_ARM64( 'darwin-aarch64', 'tar.gz', 'Contents/Home', '22.3.1' ),
+    WINDOWS_AMD64( 'windows-x64','windows-amd64', 'zip', '' ),
+    LINUX_AMD64( 'linux-x64','linux-amd64', 'tar.gz', '' ),
+    LINUX_ARM64( 'linux-aarch64','linux-aarch64', 'tar.gz', '' ),
+    MAC_AMD64( 'macos-x64','darwin-amd64', 'tar.gz', 'Contents/Home' ),
+    MAC_ARM64( 'macos-aarch64','darwin-aarch64', 'tar.gz', 'Contents/Home'  ),
     GENERIC( null, null, null, null )
 
     String downloadPlatform
@@ -13,21 +13,21 @@ enum TargetOS {
 
     String archiveJavaHome
 
-    String graalvmVersion
+    String vmDownloadPlatform
 
-    String javaVersion = 'java17'
+    String jdkVersion = '21.0.9'
 
-    TargetOS( String downloadPlatform, String downloadExt, String archiveJavaHome, String graalvmVersion )
+    TargetOS( String vmDownloadPlatform, String downloadPlatform, String downloadExt, String archiveJavaHome )
     {
+        this.vmDownloadPlatform = vmDownloadPlatform
         this.downloadPlatform = downloadPlatform
         this.downloadExt = downloadExt
         this.archiveJavaHome = archiveJavaHome
-        this.graalvmVersion = graalvmVersion
     }
 
     String toJdkPackageName()
     {
-        return "graalvm-ce-${javaVersion}-${downloadPlatform}-${graalvmVersion}"
+        return "graalvm-jdk-${jdkVersion}_${vmDownloadPlatform}_bin"
     }
 
     String toJdkPackageFile()
@@ -36,23 +36,11 @@ enum TargetOS {
         return "${jdkPackageName}.${downloadExt}"
     }
 
-    String toGraalJsFile()
-    {
-        return "js-installable-svm-${javaVersion}-${downloadPlatform}-${graalvmVersion}.jar"
-    }
 
     String toDownloadString()
     {
         def jdkPackageFile = toJdkPackageFile()
-
-        return "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${graalvmVersion}/${jdkPackageFile}"
-    }
-
-    String toGraalJsDownloadString()
-    {
-        def graalJsFile = toGraalJsFile()
-
-        return "https://github.com/oracle/graaljs/releases/download/vm-${graalvmVersion}/${graalJsFile}"
+        return "https://download.oracle.com/graalvm/21/archive/${jdkPackageFile}"
     }
 
     static from( String targetPlatform )
@@ -103,10 +91,6 @@ def getJdkPackageFile()
     return isGenericBuild() ? null : getTargetOS().toJdkPackageFile()
 }
 
-def getGraalJsFile()
-{
-    return isGenericBuild() ? null : getTargetOS().toGraalJsFile()
-}
 
 def getJdkPackageName()
 {
@@ -116,11 +100,6 @@ def getJdkPackageName()
 def getJdkDownloadUrl()
 {
     return isGenericBuild() ? null : getTargetOS().toDownloadString()
-}
-
-def getGraalJsDownloadUrl()
-{
-    return isGenericBuild() ? null : getTargetOS().toGraalJsDownloadString()
 }
 
 def isGenericBuild()
@@ -158,11 +137,6 @@ def isArm64() {
     return [ 'linux-arm64', 'mac-arm64'].contains( getTargetOsName() )
 }
 
-def withAddOptions()
-{
-    return getTargetOsName() != 'windows'
-}
-
 def getTargetOsName()
 {
     return project.findProperty( 'os' ) ?: 'generic'
@@ -183,10 +157,8 @@ ext {
     targetType = null
     jdkPackageFile = null
     getJdkPackageFile = this.&getJdkPackageFile
-    getGraalJsFile = this.&getGraalJsFile
     getJdkPackageName = this.&getJdkPackageName
     getJdkDownloadUrl = this.&getJdkDownloadUrl
-    getGraalJsDownloadUrl = this.&getGraalJsDownloadUrl
     getArchiveJavaHome = this.&getArchiveJavaHome
     isGenericBuild = this.&isGenericBuild
     isSdkBuild = this.&isSdkBuild
@@ -196,5 +168,4 @@ ext {
     withDistZip = this.&withDistZip
     withJava = this.&withJava
     isArm64 = this.&isArm64
-    withAddOptions = this.&withAddOptions
 }

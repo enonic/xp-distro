@@ -3,8 +3,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'base'
     id 'maven-publish'
-    id 'com.enonic.defaults' version '2.1.2'
-    id 'de.undercouch.download' version '5.5.0'
+    id 'com.enonic.defaults' version '2.1.5'
+    id 'de.undercouch.download' version '5.6.0'
     id 'distribution'
 }
 
@@ -41,9 +41,7 @@ ext {
     targetBaseName = getTargetBaseName()
     appLevel = 40
     downloadJdkDir = "$buildDir/jdk"
-    downloadGraalJsDir = "$buildDir/graaljs"
     jdkPackageFile = getJdkPackageFile()
-    graalJsFile = getGraalJsFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
     archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
@@ -67,27 +65,6 @@ task downloadJdk( type: Download ) {
         dest file( "$downloadJdkDir/$jdkPackageFile" )
         doFirst {
             mkdir downloadJdkDir
-        }
-    }
-}
-
-task downloadGraalJs( type: Download ) {
-    description = 'Download Graal.JS.'
-    group = 'Dist'
-
-    onlyIf {
-        withJava()
-    }
-
-    overwrite false
-    onlyIfModified true
-
-    if ( withJava() )
-    {
-        src getGraalJsDownloadUrl()
-        dest file( "$downloadGraalJsDir/$graalJsFile" )
-        doFirst {
-            mkdir downloadGraalJsDir
         }
     }
 }
@@ -136,15 +113,12 @@ task jlink( type: Exec, dependsOn: unpackJdk ) {
 
         delete jlinkDir
 
-        def args = ['jlink', '--compress=2', '--no-header-files', '--no-man-pages',
+        def args = ['jlink', '--compress=zip-6', '--no-header-files', '--no-man-pages',
                     '--add-modules', 'ALL-MODULE-PATH',
                     '--module-path', "$jmodsDir",
                     '--output', "$jlinkDir"]
 
-        if ( withAddOptions() )
-        {
-            args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
-        }
+        args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
 
         commandLine args
     }
@@ -203,17 +177,6 @@ distributions {
                         filesMatching( 'bin/*' ) { mode = 0755 }
                     }
                 }
-                into( "jdk" ) {
-                    from( archiveJavaHomeDir ) {
-                        include( "languages/icu4j/**" )
-                        include( "languages/regex/**" )
-                    }
-                }
-                into( "jdk" ) {
-                    from( zipTree( file( "$downloadGraalJsDir/$graalJsFile" ) ) ) {
-                        include( "languages/js/*" )
-                    }
-                }
             }
             else
             {
@@ -229,7 +192,7 @@ distributions {
     }
 }
 
-[distZip, distTar, installDist]*.dependsOn jlink, downloadGraalJs
+[distZip, distTar, installDist]*.dependsOn jlink
 
 publishing {
     publications {

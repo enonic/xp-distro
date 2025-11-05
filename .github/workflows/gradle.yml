@@ -21,7 +21,7 @@ jobs:
         env:
           ACTUAL_REF: ${{ github.ref }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Get publishing variables
         id: publish_vars
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17.0.7
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
