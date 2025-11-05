@@ -113,7 +113,7 @@ task jlink( type: Exec, dependsOn: unpackJdk ) {
 
         delete jlinkDir
 
-        def args = ['jlink', '--compress=2', '--no-header-files', '--no-man-pages',
+        def args = ['jlink', '--compress=zip-6', '--no-header-files', '--no-man-pages',
                     '--add-modules', 'ALL-MODULE-PATH',
                     '--module-path', "$jmodsDir",
                     '--output', "$jlinkDir"]
