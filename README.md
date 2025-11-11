@@ -25,11 +25,11 @@ There are 2 optional parameters:
 - os: `linux` | `linux-arm64` | `mac` | `mac-arm64` | `windows` | `generic` (by default `generic`)
 - type: `sdk` | `server` (by default `server`)
 
-To build a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows.
+To assemble a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows.
 The type should be 'sdk' to include the JDK and 'server' to include the JRE.
 
-    .\gradlew build -Pos=linux -Ptype=server
+    .\gradlew installDist -Pos=linux -Ptype=server
 
-    .\gradlew build -Pos=mac -Ptype=sdk
+    .\gradlew installDist -Pos=mac -Ptype=sdk
 
-    .\gradlew build -Pos=windows -Ptype=sdk
+    .\gradlew installDist -Pos=windows -Ptype=sdk
