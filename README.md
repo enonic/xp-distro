@@ -9,11 +9,11 @@ This project bundles the runtime (https://github.com/enonic/xp) with admin appli
 
 Set the desired version in `gradle.properties`, and run:
 
-    .\gradlew build
+    ./gradlew build
 
 Or, to assemble distribution content and installs it on the current machine:
 
-    .\gradlew installDist
+    ./gradlew installDist
 
 
 By default, it will build a `generic` `server` build without including the JDK.
@@ -28,8 +28,8 @@ There are 2 optional parameters:
 To assemble a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows.
 The type should be 'sdk' to include the JDK and 'server' to include the JRE.
 
-    .\gradlew installDist -Pos=linux -Ptype=server
+    ./gradlew installDist -Pos=linux -Ptype=server
 
-    .\gradlew installDist -Pos=mac -Ptype=sdk
+    ./gradlew installDist -Pos=mac -Ptype=sdk
 
-    .\gradlew installDist -Pos=windows -Ptype=sdk
+    ./gradlew installDist -Pos=windows -Ptype=sdk
