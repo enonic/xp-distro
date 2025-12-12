@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'base'
     id 'maven-publish'
-    id 'com.enonic.defaults' version '2.1.5'
+    id 'com.enonic.defaults' version '2.1.6'
     id 'de.undercouch.download' version '5.6.0'
     id 'distribution'
 }
@@ -13,7 +13,7 @@ group = 'com.enonic.xp'
 repositories {
     mavenLocal()
     maven {
-        url 'https://repo.enonic.com/dev'
+        url = 'https://repo.enonic.com/dev'
     }
 }
 
@@ -37,18 +37,17 @@ dependencies {
 }
 
 ext {
-    installDir = "$buildDir/install"
     targetBaseName = getTargetBaseName()
     appLevel = 40
-    downloadJdkDir = "$buildDir/jdk"
+    downloadJdkDir = layout.buildDirectory.dir('jdk').get()
     jdkPackageFile = getJdkPackageFile()
     jdkPackageName = getJdkPackageName()
-    unpackedJdkDir = "$downloadJdkDir/$jdkPackageName"
-    archiveJavaHomeDir = "$unpackedJdkDir/${getArchiveJavaHome()}"
-    jlinkDir = "$buildDir/jlink/$jdkPackageName/${getTargetTypeName()}"
+    unpackedJdkDir = downloadJdkDir.dir(jdkPackageName)
+    archiveJavaHomeDir = getArchiveJavaHome() ? unpackedJdkDir.dir(getArchiveJavaHome()) : unpackedJdkDir
+    jlinkDir = layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get()
 }
 
-task downloadJdk( type: Download ) {
+tasks.register('downloadJdk', Download) {
     description = 'Download JDK.'
     group = 'Dist'
 
@@ -62,14 +61,15 @@ task downloadJdk( type: Download ) {
     if ( withJava() )
     {
         src getJdkDownloadUrl()
-        dest file( "$downloadJdkDir/$jdkPackageFile" )
+        dest downloadJdkDir.file(jdkPackageFile)
         doFirst {
             mkdir downloadJdkDir
         }
     }
 }
 
-task unpackJdk( type: Copy, dependsOn: downloadJdk ) {
+tasks.register('unpackJdk', Copy) {
+    dependsOn tasks.named('downloadJdk')
     description = 'Unpack JDK.'
     group = 'Dist'
 
@@ -82,11 +82,11 @@ task unpackJdk( type: Copy, dependsOn: downloadJdk ) {
         def fileTree
         if ( jdkPackageFile.endsWith( '.zip' ) )
         {
-            fileTree = zipTree( file( "$downloadJdkDir/$jdkPackageFile" ) )
+            fileTree = zipTree( downloadJdkDir.file(jdkPackageFile) )
         }
         else if ( jdkPackageFile.endsWith( '.tar.gz' ) )
         {
-            fileTree = tarTree( resources.gzip( file( "$downloadJdkDir/$jdkPackageFile" ) ) )
+            fileTree = tarTree( resources.gzip( downloadJdkDir.file(jdkPackageFile) ) )
         }
         else
         {
@@ -104,7 +104,8 @@ task unpackJdk( type: Copy, dependsOn: downloadJdk ) {
     }
 }
 
-task jlink( type: Exec, dependsOn: unpackJdk ) {
+tasks.register('jlink', Exec) {
+    dependsOn tasks.named('unpackJdk')
     onlyIf {
         withJava()
     }
@@ -143,7 +144,7 @@ distributions {
                 }
                 if ( isArm64() )
                 {
-                    exclude { it.file.name.equals( 'jna-4.1.0.jar' ) }
+                    exclude { (it.file.name == 'jna-4.1.0.jar') }
                 }
             }
             into( "system/$appLevel" ) {
@@ -152,11 +153,11 @@ distributions {
             into( '' ) {
                 from( 'src/common' ) {
                     filesMatching( '**/*.sh' ) {
-                        mode = 0755
+                        permissions { unix '0755' }
                         filter( ReplaceTokens, tokens: [version: version] )
                     }
                     filesMatching( 'service/init.d/xp' ) {
-                        mode = 0755
+                        permissions { unix '0755' }
                     }
                     filesMatching( 'README.txt' ) {
                         expand version: version
@@ -174,7 +175,9 @@ distributions {
             {
                 into( "jdk" ) {
                     from( jlinkDir ) {
-                        filesMatching( 'bin/*' ) { mode = 0755 }
+                        filesMatching( 'bin/*' ) {
+                            permissions { unix '0755' }
+                        }
                     }
                 }
             }
@@ -183,7 +186,7 @@ distributions {
                 into( '' ) {
                     from( 'src/generic' ) {
                         filesMatching( '**/*.sh' ) {
-                            mode = 0755
+                            permissions { unix '0755' }
                         }
                     }
                 }
@@ -197,7 +200,7 @@ distributions {
 publishing {
     publications {
         mavenJava( MavenPublication ) {
-            artifactId project.ext.targetBaseName
+            artifactId = project.ext.targetBaseName
             if ( withDistTar() )
             {
                 artifact distTar
