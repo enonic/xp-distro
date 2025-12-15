@@ -141,8 +141,10 @@ distributions {
         contents {
 
             into( '' ) {
-                from {
-                    configurations.distro.collect { zipTree( it ) }
+                from (configurations.distro.collect { zipTree( it ) }) {
+                    filesMatching( '**/*.sh' ) {
+                        permissions { unix '0755' }
+                    }
                 }
                 if ( isArm64() )
                 {
@@ -155,8 +157,8 @@ distributions {
             into( '' ) {
                 from( 'src/common' ) {
                     filesMatching( '**/*.sh' ) {
-                        permissions { unix '0755' }
                         filter( ReplaceTokens, tokens: [version: version] )
+                        permissions { unix '0755' }
                     }
                     filesMatching( 'service/init.d/xp' ) {
                         permissions { unix '0755' }
