@@ -43,7 +43,6 @@ ext {
     jdkPackageFile = getJdkPackageFile()
     jdkPackageName = getJdkPackageName()
     unpackedJdkDir = downloadJdkDir.dir(jdkPackageName)
-    archiveJavaHomeDir = getArchiveJavaHome() ? unpackedJdkDir.dir(getArchiveJavaHome()) : unpackedJdkDir
     jlinkDir = layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get()
 }
 
@@ -110,6 +109,7 @@ tasks.register('jlink', Exec) {
         withJava()
     }
     doFirst {
+        def archiveJavaHomeDir = getArchiveJavaHome() ? unpackedJdkDir.dir(getArchiveJavaHome()) : unpackedJdkDir
         def jmodsDir = "$archiveJavaHomeDir/jmods"
 
         delete jlinkDir
@@ -119,13 +119,15 @@ tasks.register('jlink', Exec) {
                     '--module-path', "$jmodsDir",
                     '--output', "$jlinkDir"]
 
-        args.add( '--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions' )
+        args.add('--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions')
 
         commandLine args
     }
 
-    inputs.dir unpackedJdkDir
-    outputs.dir jlinkDir
+    if (withJava()) {
+        inputs.dir unpackedJdkDir
+        outputs.dir jlinkDir
+    }
 }
 
 distTar {
