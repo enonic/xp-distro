@@ -30,6 +30,6 @@ The type should be 'sdk' to include the JDK and 'server' to include the JRE.
 
     ./gradlew installDist -Pos=linux -Ptype=server
 
-    ./gradlew installDist -Pos=mac -Ptype=sdk
+    ./gradlew installDist -Pos=mac-arm64 -Ptype=sdk
 
     ./gradlew installDist -Pos=windows -Ptype=sdk
