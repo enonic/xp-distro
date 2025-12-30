@@ -1,13 +1,11 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-x64','windows-amd64', 'zip', '' ),
-    LINUX_AMD64( 'linux-x64','linux-amd64', 'tar.gz', '' ),
-    LINUX_ARM64( 'linux-aarch64','linux-aarch64', 'tar.gz', '' ),
-    MAC_AMD64( 'macos-x64','darwin-amd64', 'tar.gz', 'Contents/Home' ),
-    MAC_ARM64( 'macos-aarch64','darwin-aarch64', 'tar.gz', 'Contents/Home'  ),
-    GENERIC( null, null, null, null )
-
-    String downloadPlatform
+    WINDOWS_AMD64( 'windows-x64','zip', '' ),
+    LINUX_AMD64( 'linux-x64','tar.gz', '' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '' ),
+    MAC_AMD64( 'macos-x64','tar.gz', 'Contents/Home' ),
+    MAC_ARM64( 'macos-aarch64','tar.gz', 'Contents/Home'  ),
+    GENERIC( null, null, null )
 
     String downloadExt
 
@@ -17,10 +15,9 @@ enum TargetOS {
 
     String jdkVersion = '25.0.1'
 
-    TargetOS( String vmDownloadPlatform, String downloadPlatform, String downloadExt, String archiveJavaHome )
+    TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
     {
         this.vmDownloadPlatform = vmDownloadPlatform
-        this.downloadPlatform = downloadPlatform
         this.downloadExt = downloadExt
         this.archiveJavaHome = archiveJavaHome
     }
@@ -56,10 +53,6 @@ enum TargetOS {
         else if ( targetPlatform == 'linux-arm64' )
         {
             return LINUX_ARM64
-        }
-        else if ( targetPlatform == 'mac' )
-        {
-            return MAC_AMD64
         }
         else if ( targetPlatform == 'mac-arm64' )
         {
@@ -119,7 +112,7 @@ def isSdkBuild()
 
 def withDistTar()
 {
-    return ['linux', 'linux-arm64', 'mac', 'mac-arm64', 'generic'].contains( getTargetOsName() )
+    return ['linux', 'linux-arm64', 'mac-arm64', 'generic'].contains( getTargetOsName() )
 }
 
 def withDistZip()

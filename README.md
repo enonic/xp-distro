@@ -11,7 +11,7 @@ Set the desired version in `gradle.properties`, and run:
 
     ./gradlew build
 
-Or, to assemble distribution content and installs it on the current machine:
+Or, to assemble distribution content and install it on the current machine:
 
     ./gradlew installDist
 
@@ -22,10 +22,10 @@ By default, it will build a `generic` `server` build without including the JDK.
 ### Platform specific builds
 
 There are 2 optional parameters:
-- os: `linux` | `linux-arm64` | `mac` | `mac-arm64` | `windows` | `generic` (by default `generic`)
+- os: `linux` | `linux-arm64` | `mac-arm64` | `windows` | `generic` (by default `generic`)
 - type: `sdk` | `server` (by default `server`)
 
-To assemble a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: linux, mac, windows.
+To assemble a distribution that includes the JDK or JRE, pass a parameter with the type, and also the desired platform: `linux`, `mac-arm64`, `windows`.
 The type should be 'sdk' to include the JDK and 'server' to include the JRE.
 
     ./gradlew installDist -Pos=linux -Ptype=server
