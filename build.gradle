@@ -119,7 +119,7 @@ tasks.register('jlink', Exec) {
                     '--module-path', "$jmodsDir",
                     '--output', "$jlinkDir"]
 
-        args.add('--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions')
+        args.add('--add-options=-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:+EnableJVMCI -XX:-UnlockExperimentalVMOptions -XX:ThreadPriorityPolicy=1')
 
         commandLine args
     }
