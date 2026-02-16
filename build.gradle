@@ -173,6 +173,18 @@ distributions {
                     exclude 'bin/setenv.bat'
                     exclude 'bin/setenv.sh'
                 }
+
+                if ( isSdkBuild() )
+                {
+                    exclude 'home/config/logback.xml'
+                }
+            }
+
+            if ( isSdkBuild() )
+            {
+                into( '' ) {
+                    from 'src/sdk'
+                }
             }
 
             if ( withJava() )
