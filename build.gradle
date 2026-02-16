@@ -139,6 +139,14 @@ distributions {
     main {
         distributionBaseName = project.ext.targetBaseName
         contents {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            if ( isSdkBuild() )
+            {
+                into( '' ) {
+                    from 'src/sdk'
+                }
+            }
 
             into( '' ) {
                 from (configurations.distro.collect { zipTree( it ) }) {
@@ -172,18 +180,6 @@ distributions {
                 {
                     exclude 'bin/setenv.bat'
                     exclude 'bin/setenv.sh'
-                }
-
-                if ( isSdkBuild() )
-                {
-                    exclude 'home/config/logback.xml'
-                }
-            }
-
-            if ( isSdkBuild() )
-            {
-                into( '' ) {
-                    from 'src/sdk'
                 }
             }
 
