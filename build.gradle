@@ -179,11 +179,6 @@ distributions {
             {
                 into( "jdk" ) {
                     from( jlinkDir ) {
-                        eachFile {
-                            permissions {
-                                user.write = true
-                            }
-                        }
                         filesMatching( 'bin/*' ) {
                             permissions { unix '0755' }
                         }
