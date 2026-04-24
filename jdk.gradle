@@ -13,7 +13,7 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
-    String jdkVersion = '21.0.10'
+    String jdkVersion = '21.0.11'
 
     TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
     {
