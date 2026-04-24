@@ -190,6 +190,9 @@ distributions {
                         filesMatching( 'bin/*' ) {
                             permissions { unix '0755' }
                         }
+                        filesMatching( 'lib/jspawnhelper' ) {
+                            permissions { unix '0755' }
+                        }
                     }
                 }
             }
