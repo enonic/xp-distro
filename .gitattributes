@@ -1,4 +1,4 @@
 gradlew eol=lf
 *.sh eol=lf
-*.bat eol=crlf
+*.bat -text
 src/common/service/** eol=lf
