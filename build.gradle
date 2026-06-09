@@ -154,10 +154,6 @@ distributions {
                         permissions { unix '0755' }
                     }
                 }
-                if ( isArm64() )
-                {
-                    exclude { (it.file.name == 'jna-4.1.0.jar') }
-                }
             }
             into( "system/$appLevel" ) {
                 from configurations.app
