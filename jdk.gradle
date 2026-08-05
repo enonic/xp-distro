@@ -13,7 +13,9 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
-    String jdkVersion = '25.0.3'
+    String graalTrain = '25i2'
+
+    String jdkVersion = '25.0.4'
 
     TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
     {
@@ -24,7 +26,7 @@ enum TargetOS {
 
     String toJdkPackageName()
     {
-        return "graalvm-jdk-${jdkVersion}_${vmDownloadPlatform}_bin"
+        return "graalvm-jdk-${graalTrain}-${jdkVersion}_${vmDownloadPlatform}_bin"
     }
 
     String toJdkPackageFile()
@@ -37,7 +39,7 @@ enum TargetOS {
     String toDownloadString()
     {
         def jdkPackageFile = toJdkPackageFile()
-        return "https://download.oracle.com/graalvm/25/archive/${jdkPackageFile}"
+        return "https://gds.oracle.com/download/graal/${graalTrain}/archive/${jdkPackageFile}"
     }
 
     static from( String targetPlatform )
