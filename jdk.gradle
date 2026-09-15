@@ -1,11 +1,11 @@
 enum TargetOS {
 
-    WINDOWS_AMD64( 'windows-x64','zip', '' ),
-    LINUX_AMD64( 'linux-x64','tar.gz', '' ),
-    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '' ),
-    MAC_AMD64( 'macos-x64','tar.gz', 'Contents/Home' ),
-    MAC_ARM64( 'macos-aarch64','tar.gz', 'Contents/Home'  ),
-    GENERIC( null, null, null )
+    WINDOWS_AMD64( 'windows-x64','zip', '', 'windows-x86_64' ),
+    LINUX_AMD64( 'linux-x64','tar.gz', '', 'linux-x86_64' ),
+    LINUX_ARM64( 'linux-aarch64', 'tar.gz', '', 'linux-aarch64' ),
+    MAC_AMD64( 'macos-x64','tar.gz', 'Contents/Home', null ),
+    MAC_ARM64( 'macos-aarch64','tar.gz', 'Contents/Home', 'osx-aarch64' ),
+    GENERIC( null, null, null, null )
 
     String downloadExt
 
@@ -13,15 +13,18 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
+    String im4jPlatform
+
     String graalTrain = '25i3'
 
     String jdkVersion = '25.0.4.1'
 
-    TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
+    TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome, String im4jPlatform )
     {
         this.vmDownloadPlatform = vmDownloadPlatform
         this.downloadExt = downloadExt
         this.archiveJavaHome = archiveJavaHome
+        this.im4jPlatform = im4jPlatform
     }
 
     String toJdkPackageName()
@@ -107,6 +110,11 @@ def getArchiveJavaHome()
     return getTargetOS().archiveJavaHome
 }
 
+def getIm4jPlatform()
+{
+    return getTargetOS().im4jPlatform
+}
+
 def isSdkBuild()
 {
     return getTargetTypeName() == 'sdk'
@@ -150,6 +158,7 @@ ext {
     getJdkPackageName = this.&getJdkPackageName
     getJdkDownloadUrl = this.&getJdkDownloadUrl
     getArchiveJavaHome = this.&getArchiveJavaHome
+    getIm4jPlatform = this.&getIm4jPlatform
     isGenericBuild = this.&isGenericBuild
     isSdkBuild = this.&isSdkBuild
     getTargetBaseName = this.&getTargetBaseName

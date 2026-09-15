@@ -22,6 +22,18 @@ apply from: 'jdk.gradle'
 configurations {
     app
     distro
+    imagemagick
+}
+
+ext {
+    targetBaseName = getTargetBaseName()
+    appLevel = 40
+    im4jVersion = '1.0.0-SNAPSHOT'
+    downloadJdkDir = layout.buildDirectory.dir('jdk').get()
+    jdkPackageFile = getJdkPackageFile()
+    jdkPackageName = getJdkPackageName()
+    unpackedJdkDir = downloadJdkDir.dir(jdkPackageName)
+    jlinkDir = layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get()
 }
 
 dependencies {
@@ -34,16 +46,10 @@ dependencies {
         app "com.enonic.xp:app-sdk:${version}@jar"
     }
     distro( "com.enonic.xp:runtime:${version}@zip" )
-}
-
-ext {
-    targetBaseName = getTargetBaseName()
-    appLevel = 40
-    downloadJdkDir = layout.buildDirectory.dir('jdk').get()
-    jdkPackageFile = getJdkPackageFile()
-    jdkPackageName = getJdkPackageName()
-    unpackedJdkDir = downloadJdkDir.dir(jdkPackageName)
-    jlinkDir = layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get()
+    if ( getIm4jPlatform() != null )
+    {
+        imagemagick "com.enonic.im4j:im4j-natives-${getIm4jPlatform()}:${im4jVersion}@jar"
+    }
 }
 
 tasks.register('downloadJdk', Download) {
@@ -157,6 +163,9 @@ distributions {
             }
             into( "system/$appLevel" ) {
                 from configurations.app
+            }
+            into( 'system/08' ) {
+                from configurations.imagemagick
             }
             into( '' ) {
                 from( 'src/common' ) {
