@@ -39,7 +39,7 @@ There is no lint or test task — there's nothing to lint/test in this repo. Ver
 
 ### Build parameters
 
-- `-Pos=`: `linux` | `linux-arm64` | `mac-arm64` | `windows` | `generic` (default `generic`). Only non-`generic` values trigger a JDK download + jlink.
+- `-Pos=`: `linux` | `linux-arm64` | `mac-arm64` | `windows` | `generic` (default `generic`). Only non-`generic` values trigger a JDK download + jlink; they also select which `im4j` native ImageMagick fragment (if any) is bundled into `system/08/`, via `TargetOS.im4jPlatform`.
 - `-Ptype=`: `sdk` | `server` (default `server`). `sdk` additionally bundles `app-sdk` and `src/sdk` contents (includes `app-xp-welcome`); `server` does not.
 - Output archive name is `enonic-xp-<os>[-<type>]` (e.g. `enonic-xp-linux-server`, `enonic-xp-generic`). Generic builds omit the type suffix.
 - `distTar` (gzip, `.tgz`) is produced for `linux`, `linux-arm64`, `mac-arm64`, `generic`; `distZip` for `windows`.
@@ -62,6 +62,7 @@ The final distribution content (see `build.gradle`'s `distributions.main.content
 - `src/sdk/` → distribution root, **only when `type=sdk`** (adds the welcome app and SDK-only config, e.g. `src/sdk/home/config/logback.xml`).
 - The `distro` config (the `runtime` zip artifact, unzipped) → distribution root — this is the actual XP runtime engine.
 - The `app` config (the four/five admin app jars) → `system/40/` (app level 40 — see `appLevel` in `build.gradle`).
+- The `imagemagick` config (the platform-matched `im4j` native ImageMagick fragment, selected via `TargetOS.im4jPlatform`) → `system/08/`; absent for `os=generic` and any target with no matching im4j artifact, so those distributions fall back to ImageIO with no WebP/AVIF support. `system/08` is zero-padded on purpose — it merges with the runtime's existing level-8 bundles instead of creating a sibling directory XP's launcher would collide with.
 - `src/common/` → distribution root: startup scripts (`bin/service.sh`, `bin/setenv.sh`/`.bat`), default app configs (`home/config/*.cfg`, `logback.xml`), init.d/systemd service files (`service/`), and `README.txt` (version token-substituted via `ReplaceTokens`). `.sh` files and `service/init.d/xp` get `0755` permissions.
 - `src/generic/` → distribution root, **only when no JDK is bundled** (`os=generic`); provides `bin/setenv.sh`/`.bat` that assume a system-installed Java (`setenv.sh`/`.bat` are excluded from `src/common` in that case to avoid duplicates).
 - The jlink'd JDK image → `jdk/` subfolder, **only when a JDK is bundled** (non-generic os); `bin/*` and `lib/jspawnhelper` get `0755` permissions.
