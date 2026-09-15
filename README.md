@@ -33,3 +33,8 @@ The type should be 'sdk' to include the JDK and 'server' to include the JRE.
     ./gradlew installDist -Pos=mac-arm64 -Ptype=sdk
 
     ./gradlew installDist -Pos=windows -Ptype=sdk
+
+Platform-specific distributions (any `os` other than `generic`) also bundle a matching native
+ImageMagick fragment (from `im4j`), so opting into `encoding.backend=ImageMagic` gets working
+WebP/AVIF. `generic` distributions ship no native fragment, so enabling `ImageMagic` there fails
+at render time. The default backend is `ImageIO`, so out-of-the-box behavior is unchanged.
