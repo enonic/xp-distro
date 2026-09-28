@@ -13,7 +13,7 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
-    String jdkVersion = '21.0.12'
+    String jdkVersion = '21.0.12.1'
 
     TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
     {
@@ -37,7 +37,7 @@ enum TargetOS {
     String toDownloadString()
     {
         def jdkPackageFile = toJdkPackageFile()
-        return "https://download.oracle.com/graalvm/21/archive/${jdkPackageFile}"
+        return "https://gds.oracle.com/download/graal/21/archive/${jdkPackageFile}"
     }
 
     static from( String targetPlatform )
