@@ -29,6 +29,7 @@ dependencies {
     app "com.enonic.xp:app-standardidprovider:${version}@jar"
     app "com.enonic.xp:app-applications:${version}@jar"
     app "com.enonic.xp:app-users:${version}@jar"
+    app "com.enonic.xp:app-settings:${version}@jar"
     if ( isSdkBuild() )
     {
         app "com.enonic.xp:app-sdk:${version}@jar"

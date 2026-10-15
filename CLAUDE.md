@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is **not** an application source repo — it's a Gradle-based *packaging/distribution* project for Enonic XP.
 It has no Java/Kotlin source code and no test suite. Its job is to assemble a runnable distribution by:
 
-1. Downloading pre-built artifacts (`app-main`, `app-standardidprovider`, `app-applications`, `app-users`, optionally `app-sdk`, and the `runtime` zip) from Enonic's Maven repo (`https://repo.enonic.com/dev`), all pinned to the version in `gradle.properties`.
+1. Downloading pre-built artifacts (`app-main`, `app-standardidprovider`, `app-applications`, `app-users`, `app-settings`, optionally `app-sdk`, and the `runtime` zip) from Enonic's Maven repo (`https://repo.enonic.com/dev`), all pinned to the version in `gradle.properties`.
 2. Optionally downloading and `jlink`-ing a GraalVM JDK for the target OS, producing a trimmed custom runtime image.
 3. Laying out everything under `build/install/<targetBaseName>/` (or as a `.zip`/`.tgz`) combined with static files from `src/common`, `src/generic`, and `src/sdk`.
 
@@ -61,7 +61,7 @@ The final distribution content (see `build.gradle`'s `distributions.main.content
 
 - `src/sdk/` → distribution root, **only when `type=sdk`** (adds the welcome app and SDK-only config, e.g. `src/sdk/home/config/logback.xml`).
 - The `distro` config (the `runtime` zip artifact, unzipped) → distribution root — this is the actual XP runtime engine.
-- The `app` config (the four/five admin app jars) → `system/40/` (app level 40 — see `appLevel` in `build.gradle`).
+- The `app` config (the five/six admin app jars) → `system/40/` (app level 40 — see `appLevel` in `build.gradle`).
 - `src/common/` → distribution root: startup scripts (`bin/service.sh`, `bin/setenv.sh`/`.bat`), default app configs (`home/config/*.cfg`, `logback.xml`), init.d/systemd service files (`service/`), and `README.txt` (version token-substituted via `ReplaceTokens`). `.sh` files and `service/init.d/xp` get `0755` permissions.
 - `src/generic/` → distribution root, **only when no JDK is bundled** (`os=generic`); provides `bin/setenv.sh`/`.bat` that assume a system-installed Java (`setenv.sh`/`.bat` are excluded from `src/common` in that case to avoid duplicates).
 - The jlink'd JDK image → `jdk/` subfolder, **only when a JDK is bundled** (non-generic os); `bin/*` and `lib/jspawnhelper` get `0755` permissions.
@@ -75,7 +75,7 @@ The final distribution content (see `build.gradle`'s `distributions.main.content
 ### CI (`.github/workflows/`)
 
 - **`gradle.yml`** — runs on every push; builds and publishes the full `{sdk, server} × {mac-arm64, linux, linux-arm64, windows}` matrix (plus one `server`/`generic` combo) to Enonic's snapshot/dev repo, gated on branch (`master`, `7.*`, `8.*`) and non-release status via `enonic/release-tools/publish-vars`.
-- **`release.yml`** — triggered by `v*` tags; same build matrix, publishes to the release repo, combines changelogs across the related repos (`app-admin-home`, `app-applications`, `app-users`, `app-standardidprovider`, `app-xp-welcome`, `xp`), and creates the GitHub Release.
+- **`release.yml`** — triggered by `v*` tags; same build matrix, publishes to the release repo, combines changelogs across the related repos (`app-admin-home`, `app-applications`, `app-users`, `app-settings`, `app-standardidprovider`, `app-xp-welcome`, `xp`), and creates the GitHub Release.
 - **`gen_release_notes.yml`** — manual workflow to regenerate combined release notes for an existing tag.
 - All CI jobs use JDK 25 (Temurin) to *run* Gradle — independent of the GraalVM version being downloaded/bundled into the distribution itself.
 
