@@ -43,8 +43,8 @@ ext {
     downloadJdkDir = layout.buildDirectory.dir('jdk').get()
     jdkPackageFile = getJdkPackageFile()
     jdkPackageName = getJdkPackageName()
-    unpackedJdkDir = downloadJdkDir.dir(jdkPackageName)
-    jlinkDir = layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get()
+    unpackedJdkDir = withJava() ? downloadJdkDir.dir(jdkPackageName) : null
+    jlinkDir = withJava() ? layout.buildDirectory.dir("jlink/$jdkPackageName/${getTargetTypeName()}").get() : null
 }
 
 tasks.register('downloadJdk', Download) {
