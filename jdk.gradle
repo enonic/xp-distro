@@ -13,6 +13,7 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
+    // GraalVM 25 LTS (25.0.x)
     String jdkVersion = '25.0.5.1'
 
     TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
