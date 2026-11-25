@@ -13,9 +13,9 @@ enum TargetOS {
 
     String vmDownloadPlatform
 
-    String graalTrain = '25i5'
+    String graalTrain = '25i6'
 
-    String jdkVersion = '25.0.5.0.3'
+    String jdkVersion = '25.0.5.1'
 
     TargetOS( String vmDownloadPlatform, String downloadExt, String archiveJavaHome )
     {
